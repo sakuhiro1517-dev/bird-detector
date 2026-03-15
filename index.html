@@ -131,6 +131,58 @@ body{font-family:var(--sans);background:var(--bg0);color:var(--t1);min-height:10
 .mlc .prog{width:100%;height:4px;background:var(--bg3);border-radius:2px;margin-top:12px;overflow:hidden}
 .mlc .prog-fill{height:100%;background:var(--blue);border-radius:2px;width:0%;transition:width .3s}
 @media(max-width:960px){.main{grid-template-columns:1fr;grid-template-rows:1fr 1fr}.rp{border-left:none;border-top:1px solid var(--bd)}}
+
+/* === REVIEW MODE === */
+.rv-overlay{position:fixed;inset:0;background:rgba(10,14,23,.97);z-index:200;display:none;flex-direction:column}
+.rv-overlay.open{display:flex}
+.rv-header{padding:10px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bd);flex-shrink:0}
+.rv-header h3{font-family:var(--mono);font-size:13px;font-weight:500;color:var(--t1)}
+.rv-progress-bar{flex:1;max-width:300px;height:4px;background:var(--bg3);border-radius:2px;margin:0 20px;overflow:hidden}
+.rv-progress-fill{height:100%;background:var(--cyan);border-radius:2px;transition:width .3s}
+.rv-progress-text{font-family:var(--mono);font-size:11px;color:var(--t2)}
+.rv-close{background:none;border:1px solid var(--bd);color:var(--t2);font-family:var(--mono);font-size:11px;padding:5px 14px;border-radius:5px;cursor:pointer;transition:all .15s}
+.rv-close:hover{background:var(--bg3);color:var(--t1)}
+
+.rv-body{flex:1;display:flex;align-items:center;justify-content:center;gap:24px;padding:20px;min-height:0;overflow:hidden}
+
+.rv-nav-btn{width:48px;height:48px;border-radius:50%;border:1px solid var(--bd);background:var(--bg3);color:var(--t2);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
+.rv-nav-btn:hover{background:var(--bg2);color:var(--t1);border-color:var(--t2)}
+.rv-nav-btn:disabled{opacity:.2;cursor:not-allowed}
+
+.rv-card{flex:1;max-width:800px;display:flex;flex-direction:column;gap:12px;min-height:0}
+.rv-preview{flex:1;background:#000;border-radius:12px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;min-height:0;border:1px solid var(--bd)}
+.rv-preview canvas{max-width:100%;max-height:100%;object-fit:contain}
+.rv-preview .rv-time{position:absolute;top:10px;left:10px;font-family:var(--mono);font-size:14px;font-weight:600;background:rgba(0,0,0,.7);color:var(--cyan);padding:4px 12px;border-radius:6px;backdrop-filter:blur(6px)}
+.rv-preview .rv-det-count{position:absolute;top:10px;right:10px;font-family:var(--mono);font-size:12px;font-weight:600;background:rgba(239,68,68,.8);color:#fff;padding:3px 10px;border-radius:6px}
+.rv-preview .rv-status-badge{position:absolute;bottom:10px;left:10px;font-family:var(--mono);font-size:11px;font-weight:600;padding:4px 12px;border-radius:6px}
+.rv-status-badge.unmarked{background:rgba(255,255,255,.1);color:var(--t3)}
+.rv-status-badge.correct{background:rgba(34,197,94,.2);color:var(--green)}
+.rv-status-badge.incorrect{background:rgba(239,68,68,.2);color:var(--red)}
+
+.rv-info{display:flex;gap:8px;align-items:center;flex-shrink:0}
+.rv-info .rv-classes{font-family:var(--mono);font-size:12px;color:var(--t2);flex:1}
+.rv-info .rv-methods{display:flex;gap:4px}
+
+.rv-actions{display:flex;gap:12px;justify-content:center;flex-shrink:0;padding-bottom:8px}
+.rv-action-btn{width:72px;height:72px;border-radius:50%;border:2px solid;font-size:28px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.rv-action-btn.correct-btn{border-color:var(--green);background:rgba(34,197,94,.08);color:var(--green)}
+.rv-action-btn.correct-btn:hover,.rv-action-btn.correct-btn.active{background:rgba(34,197,94,.25);transform:scale(1.1)}
+.rv-action-btn.incorrect-btn{border-color:var(--red);background:rgba(239,68,68,.08);color:var(--red)}
+.rv-action-btn.incorrect-btn:hover,.rv-action-btn.incorrect-btn.active{background:rgba(239,68,68,.25);transform:scale(1.1)}
+.rv-action-btn.skip-btn{border-color:var(--bd);background:var(--bg3);color:var(--t3);width:52px;height:52px;font-size:16px;align-self:center}
+.rv-action-btn.skip-btn:hover{background:var(--bg2);color:var(--t2)}
+
+.rv-shortcuts{text-align:center;font-family:var(--mono);font-size:10px;color:var(--t3);flex-shrink:0}
+.rv-shortcuts kbd{background:var(--bg3);border:1px solid var(--bd);border-radius:3px;padding:1px 6px;font-size:10px;margin:0 2px}
+
+.rv-done{text-align:center;padding:60px 20px}
+.rv-done-icon{font-size:48px;margin-bottom:16px}
+.rv-done h3{font-family:var(--mono);font-size:16px;font-weight:500;color:var(--t1);margin-bottom:8px}
+.rv-done p{font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:4px}
+.rv-done .rv-done-stats{display:flex;gap:20px;justify-content:center;margin:20px 0}
+.rv-done .rv-done-stat{text-align:center}
+.rv-done .rv-done-stat .num{font-family:var(--mono);font-size:24px;font-weight:700}
+.rv-done .rv-done-stat .label{font-family:var(--mono);font-size:9px;color:var(--t3);text-transform:uppercase}
 </style>
 </head>
 <body>
@@ -193,9 +245,60 @@ body{font-family:var(--sans);background:var(--bg0);color:var(--t1);min-height:10
     <div class="si"><div class="sv2" id="statIncorrect">0</div><div class="sl">誤検知</div></div>
   </div>
   <div class="lc" id="logContainer"><div class="le-empty" id="logEmpty"><div class="le-icon">🔍</div><div>検知を開始するとログが表示されます</div></div></div>
-  <div class="pf"><button class="b sec" onclick="exportCSV()">📥 CSV</button><button class="b sec" onclick="clearLog()">🗑 クリア</button></div>
+  <div class="pf"><button class="b sec" onclick="openReview()" id="btnReview" disabled>👁 レビュー</button><button class="b sec" onclick="exportCSV()">📥 CSV</button><button class="b sec" onclick="clearLog()">🗑 クリア</button></div>
 </section>
 </main>
+
+<!-- REVIEW MODE OVERLAY -->
+<div class="rv-overlay" id="reviewOverlay">
+  <div class="rv-header">
+    <h3>👁 プレビューレビュー</h3>
+    <div class="rv-progress-bar"><div class="rv-progress-fill" id="rvProgressFill"></div></div>
+    <span class="rv-progress-text" id="rvProgressText">0 / 0</span>
+    <button class="rv-close" onclick="closeReview()">✕ 閉じる (Esc)</button>
+  </div>
+  <div class="rv-body" id="rvBody">
+    <button class="rv-nav-btn" id="rvPrev" onclick="rvNavigate(-1)">‹</button>
+    <div class="rv-card" id="rvCard">
+      <div class="rv-preview" id="rvPreview">
+        <canvas id="rvCanvas" width="640" height="360"></canvas>
+        <span class="rv-time" id="rvTime">00:00:00</span>
+        <span class="rv-det-count" id="rvDetCount">0</span>
+        <span class="rv-status-badge unmarked" id="rvStatusBadge">未判定</span>
+      </div>
+      <div class="rv-info">
+        <span class="rv-classes" id="rvClasses"></span>
+        <div class="rv-methods" id="rvMethods"></div>
+      </div>
+      <div class="rv-actions">
+        <button class="rv-action-btn incorrect-btn" id="rvBtnIncorrect" onclick="rvMark('incorrect')">✕</button>
+        <button class="rv-action-btn skip-btn" onclick="rvNavigate(1)">▸</button>
+        <button class="rv-action-btn correct-btn" id="rvBtnCorrect" onclick="rvMark('correct')">○</button>
+      </div>
+      <div class="rv-shortcuts">
+        <kbd>←</kbd> 前へ &nbsp; <kbd>→</kbd> 次へ &nbsp; <kbd>O</kbd> 正検知 &nbsp; <kbd>X</kbd> 誤検知 &nbsp; <kbd>Space</kbd> スキップ &nbsp; <kbd>Esc</kbd> 閉じる
+      </div>
+    </div>
+    <button class="rv-nav-btn" id="rvNext" onclick="rvNavigate(1)">›</button>
+  </div>
+  <!-- Done screen -->
+  <div class="rv-done" id="rvDone" style="display:none">
+    <div class="rv-done-icon">✅</div>
+    <h3>レビュー完了</h3>
+    <div class="rv-done-stats">
+      <div class="rv-done-stat"><div class="num" style="color:var(--cyan)" id="rvDoneTotal">0</div><div class="label">全グループ</div></div>
+      <div class="rv-done-stat"><div class="num" style="color:var(--green)" id="rvDoneCorrect">0</div><div class="label">正検知</div></div>
+      <div class="rv-done-stat"><div class="num" style="color:var(--red)" id="rvDoneIncorrect">0</div><div class="label">誤検知</div></div>
+      <div class="rv-done-stat"><div class="num" style="color:var(--t3)" id="rvDoneSkipped">0</div><div class="label">未判定</div></div>
+    </div>
+    <p>CSV出力でフィードバック結果をダウンロードできます</p>
+    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center">
+      <button class="b sec" onclick="exportCSV();closeReview()">📥 CSV出力して閉じる</button>
+      <button class="b sec" onclick="rvGoToIndex(0)">最初から再レビュー</button>
+      <button class="b sec" onclick="closeReview()">閉じる</button>
+    </div>
+  </div>
+</div>
 <script>
 // ============================================================
 //  【設定】モデルファイルのURL
@@ -754,7 +857,7 @@ $('logContainer').prepend(el);const img=new Image();img.onload=()=>{const c=$('t
 function toggleExpand(gid){const el=$('grp-'+gid);if(el)el.classList.toggle('expanded')}
 function setGrpFB(gid,type,btn){const g=groups.find(g=>g.id===gid);if(!g)return;g.feedback=type;g.items.forEach(it=>it.feedback=type);const par=btn.parentElement;par.querySelectorAll('.grp-fb').forEach(b=>b.className='grp-fb');btn.classList.add(type);const det=$('detail-'+gid);if(det){det.querySelectorAll('.fb-sm').forEach(b=>b.className='fb-sm');det.querySelectorAll('.gdi-fb').forEach(fb=>{fb.querySelector('.fb-sm:nth-child('+(type==='correct'?'1':'2')+')').classList.add(type)})}updateStats()}
 function setItemFB(gid,idx,type,btn){const g=groups.find(g=>g.id===gid);if(!g)return;g.items[idx].feedback=type;btn.parentElement.querySelectorAll('.fb-sm').forEach(b=>b.className='fb-sm');btn.classList.add(type);g.feedback=null;$('grp-'+gid)?.querySelectorAll('.grp-actions .grp-fb').forEach(b=>b.className='grp-fb');updateStats()}
-function updateStats(){const ti=groups.reduce((s,g)=>s+g.items.length,0);$('statGroups').textContent=groups.length;$('statItems').textContent=ti;$('statCorrect').textContent=groups.reduce((s,g)=>s+g.items.filter(i=>i.feedback==='correct').length,0);$('statIncorrect').textContent=groups.reduce((s,g)=>s+g.items.filter(i=>i.feedback==='incorrect').length,0);$('detectionCount').textContent=groups.length+' グループ'}
+function updateStats(){const ti=groups.reduce((s,g)=>s+g.items.length,0);$('statGroups').textContent=groups.length;$('statItems').textContent=ti;$('statCorrect').textContent=groups.reduce((s,g)=>s+g.items.filter(i=>i.feedback==='correct').length,0);$('statIncorrect').textContent=groups.reduce((s,g)=>s+g.items.filter(i=>i.feedback==='incorrect').length,0);$('detectionCount').textContent=groups.length+' グループ';$('btnReview').disabled=groups.length===0}
 function clearLog(){if(!groups.length||!confirm('クリアしますか？'))return;groups=[];groupId=0;lastLogTime=-1;$('logContainer').innerHTML='';$('logContainer').appendChild($('logEmpty'));$('logEmpty').style.display='flex';updateStats()}
 function exportCSV(){if(!groups.length){alert('データなし');return}let csv='group_id,time_sec,time_formatted,item_index,class,score,method,area_px,feedback\n';for(const g of groups)for(let i=0;i<g.items.length;i++){const it=g.items[i];csv+=g.id+','+g.time.toFixed(2)+','+fmtT(g.time)+','+i+','+it.class+','+it.score.toFixed(4)+','+it.method+','+it.area+','+(it.feedback||'')+'\n'}const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download='bird_det_'+new Date().toISOString().slice(0,19).replace(/:/g,'-')+'.csv';a.click()}
 function seekTo(t){videoPlayer.currentTime=t;videoPlayer.pause()}
@@ -764,6 +867,158 @@ function setStatus(type,text){$('statusBadge').className='sb '+type;$('statusBad
 // ============================================================
 //  起動
 // ============================================================
+// ============================================================
+//  レビューモード
+//  大きなプレビューで1件ずつ確認。キーボード操作対応。
+// ============================================================
+let rvIndex = 0;
+let rvOpen = false;
+
+function openReview() {
+  if (!groups.length) return;
+  rvOpen = true;
+  rvIndex = 0;
+  // 未判定のものから開始
+  const firstUnmarked = groups.findIndex(g => g.feedback === null);
+  if (firstUnmarked >= 0) rvIndex = firstUnmarked;
+  $('reviewOverlay').classList.add('open');
+  $('rvDone').style.display = 'none';
+  $('rvBody').style.display = 'flex';
+  rvRender();
+}
+
+function closeReview() {
+  rvOpen = false;
+  $('reviewOverlay').classList.remove('open');
+  // ログリスト側のUIを更新
+  refreshLogList();
+}
+
+function rvGoToIndex(idx) {
+  rvIndex = idx;
+  $('rvDone').style.display = 'none';
+  $('rvBody').style.display = 'flex';
+  rvRender();
+}
+
+function rvRender() {
+  if (rvIndex < 0) rvIndex = 0;
+  if (rvIndex >= groups.length) { rvShowDone(); return; }
+
+  const g = groups[rvIndex];
+  // Progress
+  const reviewed = groups.filter(g => g.feedback !== null).length;
+  $('rvProgressFill').style.width = (reviewed / groups.length * 100) + '%';
+  $('rvProgressText').textContent = `${rvIndex + 1} / ${groups.length}（判定済: ${reviewed}）`;
+
+  // Nav buttons
+  $('rvPrev').disabled = rvIndex === 0;
+  $('rvNext').disabled = rvIndex >= groups.length - 1;
+
+  // Time & counts
+  $('rvTime').textContent = fmtT(g.time);
+  $('rvDetCount').textContent = g.items.length + ' 件検知';
+
+  // Status badge
+  const badge = $('rvStatusBadge');
+  badge.className = 'rv-status-badge ' + (g.feedback || 'unmarked');
+  badge.textContent = g.feedback === 'correct' ? '正検知 ○' : g.feedback === 'incorrect' ? '誤検知 ✕' : '未判定';
+
+  // Classes and methods
+  $('rvClasses').textContent = g.items.map(i => i.class.toUpperCase()).join(', ');
+  const methods = [...new Set(g.items.map(i => i.method))];
+  $('rvMethods').innerHTML = methods.map(m =>
+    '<span class="lm ' + (m === 'zoom' ? 'zoom' : m === 'motion' ? 'motion' : 'ai') + '">' +
+    (m === 'zoom' ? 'ZOOM' : m === 'motion' ? 'MOTION' : 'AI') + '</span>'
+  ).join('');
+
+  // Action button highlights
+  $('rvBtnCorrect').classList.toggle('active', g.feedback === 'correct');
+  $('rvBtnIncorrect').classList.toggle('active', g.feedback === 'incorrect');
+
+  // Draw large preview
+  const canvas = $('rvCanvas');
+  const img = new Image();
+  img.onload = () => {
+    canvas.width = img.naturalWidth;
+    canvas.height = img.naturalHeight;
+    const cx = canvas.getContext('2d');
+    cx.drawImage(img, 0, 0);
+  };
+  img.src = g.thumbDataUrl;
+
+  // Also seek video to this time
+  videoPlayer.currentTime = g.time;
+}
+
+function rvMark(type) {
+  if (rvIndex >= groups.length) return;
+  const g = groups[rvIndex];
+  g.feedback = type;
+  g.items.forEach(it => it.feedback = type);
+  updateStats();
+  rvRender();
+  // Auto-advance after short delay
+  setTimeout(() => rvNavigate(1), 250);
+}
+
+function rvNavigate(dir) {
+  rvIndex += dir;
+  if (rvIndex < 0) rvIndex = 0;
+  if (rvIndex >= groups.length) { rvShowDone(); return; }
+  rvRender();
+}
+
+function rvShowDone() {
+  $('rvBody').style.display = 'none';
+  $('rvDone').style.display = 'block';
+  const total = groups.length;
+  const correct = groups.filter(g => g.feedback === 'correct').length;
+  const incorrect = groups.filter(g => g.feedback === 'incorrect').length;
+  const skipped = total - correct - incorrect;
+  $('rvDoneTotal').textContent = total;
+  $('rvDoneCorrect').textContent = correct;
+  $('rvDoneIncorrect').textContent = incorrect;
+  $('rvDoneSkipped').textContent = skipped;
+  $('rvProgressFill').style.width = '100%';
+  $('rvProgressText').textContent = `完了: ${total} グループ`;
+}
+
+// Sync log list card UI after review
+function refreshLogList() {
+  for (const g of groups) {
+    const el = $('grp-' + g.id);
+    if (!el) continue;
+    const btns = el.querySelectorAll('.grp-actions .grp-fb');
+    btns.forEach(b => b.className = 'grp-fb');
+    if (g.feedback === 'correct') btns[0]?.classList.add('correct');
+    if (g.feedback === 'incorrect') btns[1]?.classList.add('incorrect');
+    const det = $('detail-' + g.id);
+    if (det) {
+      det.querySelectorAll('.fb-sm').forEach(b => b.className = 'fb-sm');
+      if (g.feedback) {
+        det.querySelectorAll('.gdi-fb').forEach(fb => {
+          fb.querySelector('.fb-sm:nth-child(' + (g.feedback === 'correct' ? '1' : '2') + ')')?.classList.add(g.feedback);
+        });
+      }
+    }
+  }
+  updateStats();
+}
+
+// Keyboard shortcuts for review mode
+document.addEventListener('keydown', e => {
+  if (!rvOpen) return;
+  switch(e.key) {
+    case 'ArrowLeft':  e.preventDefault(); rvNavigate(-1); break;
+    case 'ArrowRight': e.preventDefault(); rvNavigate(1); break;
+    case 'o': case 'O': e.preventDefault(); rvMark('correct'); break;
+    case 'x': case 'X': e.preventDefault(); rvMark('incorrect'); break;
+    case ' ':          e.preventDefault(); rvNavigate(1); break;
+    case 'Escape':     e.preventDefault(); closeReview(); break;
+  }
+});
+
 loadModel();
 </script>
 </body>
