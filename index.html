@@ -271,26 +271,89 @@ const roiCanvas=$('roiCanvas'),roiCtx=roiCanvas.getContext('2d');
 //         WebAssembly (WASM) バックエンドを使用。
 //         GPUは不要でCPUのみで動作する。
 // ============================================================
+// 使用中のバックエンド名（UIに表示用）
+let activeBackend = 'unknown';
+
 async function loadModel(){
   try{
     $('loadingTitle').textContent='YOLOX-Tiny (ONNX) 読み込み中...';
-    $('loadingMsg').textContent='モデルファイルをダウンロード中です...';
+    $('loadingMsg').textContent='最適な実行環境を検出中...';
 
-    // ONNX Runtime の設定
-    // numThreads: 使用するCPUスレッド数（多いほど速い）
-    // simd: SIMD命令を使用（対応ブラウザで高速化）
+    // WASM (CPU) の設定: マルチスレッド + SIMD で高速化
     ort.env.wasm.numThreads = Math.min(navigator.hardwareConcurrency || 4, 4);
 
-    // セッション作成 = モデルファイルの読み込み + 初期化
-    // ここでモデルファイル（約20MB）がダウンロードされる
-    onnxSession = await ort.InferenceSession.create(MODEL_URL, {
-      executionProviders: ['wasm'],  // WebAssembly で実行
-      graphOptimizationLevel: 'all'  // 最適化を全て有効に
-    });
+    // ============================================================
+    //  バックエンド自動選択（高速化のキモ）
+    //
+    //  優先順: WebGPU → WebGL → WASM (CPU)
+    //
+    //  WebGPU: ブラウザ内でGPUを使える最新API。
+    //          Chrome 113+, Edge 113+ で対応。
+    //          対応していれば WASM の 5〜10倍速い。
+    //
+    //  WebGL:  WebGPU非対応の場合のGPUフォールバック。
+    //          ほぼ全てのブラウザで動作。
+    //
+    //  WASM:   GPU が使えない場合のCPUフォールバック。
+    //          最も遅いが、確実に動作する。
+    // ============================================================
+    let session = null;
 
-    // 読み込み成功
-    console.log('ONNX session created. Inputs:', onnxSession.inputNames, 'Outputs:', onnxSession.outputNames);
+    // --- 試行1: WebGPU ---
+    if ('gpu' in navigator) {
+      try {
+        $('loadingMsg').textContent='WebGPU (GPU高速モード) を試行中...';
+        session = await ort.InferenceSession.create(MODEL_URL, {
+          executionProviders: ['webgpu'],
+          graphOptimizationLevel: 'all'
+        });
+        activeBackend = 'WebGPU';
+        console.log('Using WebGPU backend (fastest)');
+      } catch(e) {
+        console.warn('WebGPU failed, trying WebGL...', e.message);
+        session = null;
+      }
+    }
+
+    // --- 試行2: WebGL ---
+    if (!session) {
+      try {
+        $('loadingMsg').textContent='WebGL (GPU) を試行中...';
+        session = await ort.InferenceSession.create(MODEL_URL, {
+          executionProviders: ['webgl'],
+          graphOptimizationLevel: 'all'
+        });
+        activeBackend = 'WebGL';
+        console.log('Using WebGL backend');
+      } catch(e) {
+        console.warn('WebGL failed, falling back to WASM...', e.message);
+        session = null;
+      }
+    }
+
+    // --- 試行3: WASM (CPU) 最終フォールバック ---
+    if (!session) {
+      $('loadingMsg').textContent='WASM (CPU) で読み込み中...';
+      session = await ort.InferenceSession.create(MODEL_URL, {
+        executionProviders: ['wasm'],
+        graphOptimizationLevel: 'all'
+      });
+      activeBackend = 'WASM';
+      console.log('Using WASM backend (CPU, slowest)');
+    }
+
+    onnxSession = session;
+    console.log('ONNX session created. Backend:', activeBackend, 'Inputs:', onnxSession.inputNames, 'Outputs:', onnxSession.outputNames);
     $('modelOverlay').classList.add('hidden');
+
+    // バックエンド情報をヘッダー横に表示
+    const backendColors = { 'WebGPU': 'var(--green)', 'WebGL': 'var(--cyan)', 'WASM': 'var(--amber)' };
+    const backendLabels = { 'WebGPU': 'GPU (WebGPU)', 'WebGL': 'GPU (WebGL)', 'WASM': 'CPU (WASM)' };
+    const speedHints = { 'WebGPU': '高速', 'WebGL': '中速', 'WASM': '低速' };
+    $('statusBadge').insertAdjacentHTML('beforebegin',
+      `<span style="font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:10px;background:${backendColors[activeBackend]}22;color:${backendColors[activeBackend]};border:1px solid ${backendColors[activeBackend]}44">${backendLabels[activeBackend]} ${speedHints[activeBackend]}</span>`
+    );
+
     setStatus('idle','STANDBY');
   } catch(e) {
     console.error('Model load error:', e);
