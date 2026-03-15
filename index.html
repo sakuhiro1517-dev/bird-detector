@@ -3,20 +3,10 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>鳥検知ツール v0.8 (YOLOX-Tiny ONNX)</title>
-<!--
-  ============================================================
-  【変更点1/5】CDNライブラリの差し替え
-  
-  以前: TensorFlow.js + COCO-SSD
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs"></script>
-    <script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd"></script>
-  
-  今回: ONNX Runtime Web のみ
-    onnxruntime-web は WebAssembly で推論を実行します。
-    GPU不要でCPUだけで動きます。
-  ============================================================
--->
+<title>鳥検知ツール v0.9</title>
+<!-- 両方のAIエンジンを読み込み（使わない方は待機するだけ） -->
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow/tfjs@4.17.0/dist/tf.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/@tensorflow-models/coco-ssd@2.2.3/dist/coco-ssd.min.js"></script>
 <script src="https://cdn.jsdelivr.net/npm/onnxruntime-web@1.21.0/dist/ort.min.js"></script>
 <link href="https://fonts.googleapis.com/css2?family=JetBrains+Mono:wght@300;400;500;600;700&family=Noto+Sans+JP:wght@300;400;500;700&display=swap" rel="stylesheet">
 <style>
@@ -27,6 +17,8 @@ body{font-family:var(--sans);background:var(--bg0);color:var(--t1);min-height:10
 .hdr-l{display:flex;align-items:center;gap:12px}
 .hdr-logo{width:28px;height:28px;background:linear-gradient(135deg,var(--blue),var(--cyan));border-radius:7px;display:flex;align-items:center;justify-content:center;font-size:15px}
 .hdr-t{font-family:var(--mono);font-size:13px;font-weight:600}.hdr-s{font-family:var(--mono);font-size:9px;color:var(--t3);letter-spacing:1px;text-transform:uppercase}
+.hdr-r{display:flex;align-items:center;gap:8px}
+.engine-badge{font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:10px;border:1px solid}
 .sb{font-family:var(--mono);font-size:10px;font-weight:500;padding:3px 10px;border-radius:16px;display:flex;align-items:center;gap:5px}
 .sb::before{content:'';width:5px;height:5px;border-radius:50%;display:inline-block}
 .sb.idle{background:rgba(74,85,104,.3);color:var(--t2);border:1px solid var(--bd)}.sb.idle::before{background:var(--t3)}
@@ -69,20 +61,22 @@ body{font-family:var(--sans);background:var(--bg0);color:var(--t1);min-height:10
 .cg select{min-width:46px}.cg input[type="number"]{width:44px}
 .cg input[type="range"]{width:50px;accent-color:var(--blue)}.cv{color:var(--cyan);min-width:22px;text-align:right;font-size:10px}
 .sr{display:flex;gap:5px;flex-wrap:wrap}
-.sc{flex:1;min-width:150px;padding:7px 9px;background:var(--bg2);border-radius:6px;border:1px solid var(--bd)}
+.sc{flex:1;min-width:145px;padding:7px 9px;background:var(--bg2);border-radius:6px;border:1px solid var(--bd)}
 .sc h4{font-family:var(--mono);font-size:9px;font-weight:600;margin-bottom:5px;color:var(--t2);display:flex;align-items:center;gap:4px}
 .tg{font-size:8px;padding:1px 4px;border-radius:2px;font-weight:500}
-.tg.mt{background:rgba(249,115,22,.2);color:var(--orange)}.tg.at{background:rgba(59,130,246,.2);color:var(--blue)}.tg.rt{background:rgba(34,197,94,.2);color:var(--green)}.tg.ft{background:rgba(168,85,247,.2);color:var(--purple)}.tg.zt{background:rgba(6,182,212,.2);color:var(--cyan)}
+.tg.mt{background:rgba(249,115,22,.2);color:var(--orange)}.tg.at{background:rgba(59,130,246,.2);color:var(--blue)}.tg.rt{background:rgba(34,197,94,.2);color:var(--green)}.tg.ft{background:rgba(168,85,247,.2);color:var(--purple)}.tg.zt{background:rgba(6,182,212,.2);color:var(--cyan)}.tg.nt{background:rgba(239,68,68,.15);color:var(--red)}
 .srow{display:flex;align-items:center;gap:5px;margin-bottom:3px;font-family:var(--mono);font-size:10px;color:var(--t2)}
 .srow:last-child{margin-bottom:0}.srow label{min-width:52px;white-space:nowrap;font-size:9px}
 .srow input[type="range"]{flex:1;accent-color:var(--blue)}
 .srow input[type="number"],.srow select{font-family:var(--mono);font-size:10px;background:var(--bg3);color:var(--t1);border:1px solid var(--bd);border-radius:3px;padding:2px 4px;outline:none}
 .srow input[type="number"]{width:48px}.srow select{flex:1}
 .srow .sv{color:var(--cyan);min-width:24px;text-align:right;font-size:9px}
+.srow input[type="checkbox"]{accent-color:var(--blue)}
 .roi-list{margin-top:3px;max-height:50px;overflow-y:auto}
 .roi-item{display:flex;align-items:center;gap:4px;padding:2px 4px;margin-bottom:2px;background:var(--bg3);border-radius:3px;font-family:var(--mono);font-size:8px;color:var(--t2)}
 .roi-item .rc{width:7px;height:7px;border-radius:2px;flex-shrink:0}.roi-item .ri{flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
 .roi-item .rd{background:none;border:none;color:var(--red);cursor:pointer;font-size:9px;opacity:.6}.roi-item .rd:hover{opacity:1}
+/* Right panel */
 .rp{background:var(--bg1);border-left:1px solid var(--bd);display:flex;flex-direction:column;overflow:hidden}
 .ph{padding:10px 14px;border-bottom:1px solid var(--bd);display:flex;align-items:center;justify-content:space-between}
 .ph h2{font-family:var(--mono);font-size:11px;font-weight:600;display:flex;align-items:center;gap:6px}
@@ -102,7 +96,6 @@ body{font-family:var(--sans);background:var(--bg0);color:var(--t1);min-height:10
 .grp-thumb{width:130px;min-height:72px;background:#000;flex-shrink:0;position:relative;overflow:hidden;cursor:pointer}
 .grp-thumb canvas{width:100%;height:100%;object-fit:contain}
 .grp-thumb .grp-count{position:absolute;top:3px;right:3px;font-family:var(--mono);font-size:10px;font-weight:700;background:rgba(239,68,68,.85);color:#fff;padding:1px 5px;border-radius:3px}
-.grp-thumb .grp-zoom-badge{position:absolute;bottom:3px;left:3px;font-family:var(--mono);font-size:8px;font-weight:600;background:rgba(6,182,212,.8);color:#fff;padding:1px 4px;border-radius:2px}
 .grp-info{flex:1;padding:7px 9px;display:flex;flex-direction:column;justify-content:center;gap:2px;min-width:0}
 .grp-time{font-family:var(--mono);font-size:12px;font-weight:600;color:var(--cyan)}
 .grp-summary{font-family:var(--mono);font-size:9px;color:var(--t2);overflow:hidden;text-overflow:ellipsis;white-space:nowrap}
@@ -120,7 +113,8 @@ body{font-family:var(--sans);background:var(--bg0);color:var(--t1);min-height:10
 .gdi-class{font-weight:600;color:var(--t1);min-width:50px}.gdi-score{color:var(--t3)}
 .gdi-fb{display:flex;gap:2px;margin-left:auto}
 .fb-sm{width:20px;height:18px;border-radius:3px;border:1px solid var(--bd);background:transparent;cursor:pointer;font-size:10px;display:flex;align-items:center;justify-content:center;color:var(--t3)}
-.fb-sm:hover{background:var(--bg1)}.fb-sm.correct{border-color:var(--green);background:rgba(34,197,94,.15);color:var(--green)}.fb-sm.incorrect{border-color:var(--red);background:rgba(239,68,68,.15);color:var(--red)}
+.fb-sm.correct{border-color:var(--green);background:rgba(34,197,94,.15);color:var(--green)}
+.fb-sm.incorrect{border-color:var(--red);background:rgba(239,68,68,.15);color:var(--red)}
 .pf{padding:8px 10px;border-top:1px solid var(--bd);display:flex;gap:5px}.pf .b{flex:1;justify-content:center}
 .mo{position:fixed;inset:0;background:rgba(10,14,23,.92);backdrop-filter:blur(8px);display:flex;align-items:center;justify-content:center;z-index:1000;transition:opacity .4s}
 .mo.hidden{opacity:0;pointer-events:none}
@@ -128,11 +122,7 @@ body{font-family:var(--sans);background:var(--bg0);color:var(--t1);min-height:10
 .mls{width:40px;height:40px;border:3px solid var(--bd);border-top-color:var(--blue);border-radius:50%;animation:spin 1s linear infinite;margin:0 auto 14px}
 @keyframes spin{to{transform:rotate(360deg)}}
 .mlc h3{font-family:var(--mono);font-size:12px;font-weight:500;margin-bottom:5px}.mlc p{font-size:10px;color:var(--t3);line-height:1.6}
-.mlc .prog{width:100%;height:4px;background:var(--bg3);border-radius:2px;margin-top:12px;overflow:hidden}
-.mlc .prog-fill{height:100%;background:var(--blue);border-radius:2px;width:0%;transition:width .3s}
-@media(max-width:960px){.main{grid-template-columns:1fr;grid-template-rows:1fr 1fr}.rp{border-left:none;border-top:1px solid var(--bd)}}
-
-/* === REVIEW MODE === */
+/* Review mode */
 .rv-overlay{position:fixed;inset:0;background:rgba(10,14,23,.97);z-index:200;display:none;flex-direction:column}
 .rv-overlay.open{display:flex}
 .rv-header{padding:10px 20px;display:flex;align-items:center;justify-content:space-between;border-bottom:1px solid var(--bd);flex-shrink:0}
@@ -140,54 +130,43 @@ body{font-family:var(--sans);background:var(--bg0);color:var(--t1);min-height:10
 .rv-progress-bar{flex:1;max-width:300px;height:4px;background:var(--bg3);border-radius:2px;margin:0 20px;overflow:hidden}
 .rv-progress-fill{height:100%;background:var(--cyan);border-radius:2px;transition:width .3s}
 .rv-progress-text{font-family:var(--mono);font-size:11px;color:var(--t2)}
-.rv-close{background:none;border:1px solid var(--bd);color:var(--t2);font-family:var(--mono);font-size:11px;padding:5px 14px;border-radius:5px;cursor:pointer;transition:all .15s}
-.rv-close:hover{background:var(--bg3);color:var(--t1)}
-
+.rv-close{background:none;border:1px solid var(--bd);color:var(--t2);font-family:var(--mono);font-size:11px;padding:5px 14px;border-radius:5px;cursor:pointer}
 .rv-body{flex:1;display:flex;align-items:center;justify-content:center;gap:24px;padding:20px;min-height:0;overflow:hidden}
-
-.rv-nav-btn{width:48px;height:48px;border-radius:50%;border:1px solid var(--bd);background:var(--bg3);color:var(--t2);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s;flex-shrink:0}
-.rv-nav-btn:hover{background:var(--bg2);color:var(--t1);border-color:var(--t2)}
+.rv-nav-btn{width:48px;height:48px;border-radius:50%;border:1px solid var(--bd);background:var(--bg3);color:var(--t2);font-size:20px;cursor:pointer;display:flex;align-items:center;justify-content:center;flex-shrink:0}
 .rv-nav-btn:disabled{opacity:.2;cursor:not-allowed}
-
 .rv-card{flex:1;max-width:800px;display:flex;flex-direction:column;gap:12px;min-height:0}
 .rv-preview{flex:1;background:#000;border-radius:12px;overflow:hidden;position:relative;display:flex;align-items:center;justify-content:center;min-height:0;border:1px solid var(--bd)}
 .rv-preview canvas{max-width:100%;max-height:100%;object-fit:contain}
-.rv-preview .rv-time{position:absolute;top:10px;left:10px;font-family:var(--mono);font-size:14px;font-weight:600;background:rgba(0,0,0,.7);color:var(--cyan);padding:4px 12px;border-radius:6px;backdrop-filter:blur(6px)}
+.rv-preview .rv-time{position:absolute;top:10px;left:10px;font-family:var(--mono);font-size:14px;font-weight:600;background:rgba(0,0,0,.7);color:var(--cyan);padding:4px 12px;border-radius:6px}
 .rv-preview .rv-det-count{position:absolute;top:10px;right:10px;font-family:var(--mono);font-size:12px;font-weight:600;background:rgba(239,68,68,.8);color:#fff;padding:3px 10px;border-radius:6px}
 .rv-preview .rv-status-badge{position:absolute;bottom:10px;left:10px;font-family:var(--mono);font-size:11px;font-weight:600;padding:4px 12px;border-radius:6px}
 .rv-status-badge.unmarked{background:rgba(255,255,255,.1);color:var(--t3)}
 .rv-status-badge.correct{background:rgba(34,197,94,.2);color:var(--green)}
 .rv-status-badge.incorrect{background:rgba(239,68,68,.2);color:var(--red)}
-
 .rv-info{display:flex;gap:8px;align-items:center;flex-shrink:0}
 .rv-info .rv-classes{font-family:var(--mono);font-size:12px;color:var(--t2);flex:1}
-.rv-info .rv-methods{display:flex;gap:4px}
-
 .rv-actions{display:flex;gap:12px;justify-content:center;flex-shrink:0;padding-bottom:8px}
-.rv-action-btn{width:72px;height:72px;border-radius:50%;border:2px solid;font-size:28px;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
-.rv-action-btn.correct-btn{border-color:var(--green);background:rgba(34,197,94,.08);color:var(--green)}
+.rv-action-btn{border-radius:50%;border:2px solid;font-weight:700;cursor:pointer;display:flex;align-items:center;justify-content:center;transition:all .15s}
+.rv-action-btn.correct-btn{width:72px;height:72px;font-size:28px;border-color:var(--green);background:rgba(34,197,94,.08);color:var(--green)}
 .rv-action-btn.correct-btn:hover,.rv-action-btn.correct-btn.active{background:rgba(34,197,94,.25);transform:scale(1.1)}
-.rv-action-btn.incorrect-btn{border-color:var(--red);background:rgba(239,68,68,.08);color:var(--red)}
+.rv-action-btn.incorrect-btn{width:72px;height:72px;font-size:28px;border-color:var(--red);background:rgba(239,68,68,.08);color:var(--red)}
 .rv-action-btn.incorrect-btn:hover,.rv-action-btn.incorrect-btn.active{background:rgba(239,68,68,.25);transform:scale(1.1)}
 .rv-action-btn.skip-btn{border-color:var(--bd);background:var(--bg3);color:var(--t3);width:52px;height:52px;font-size:16px;align-self:center}
-.rv-action-btn.skip-btn:hover{background:var(--bg2);color:var(--t2)}
-
 .rv-shortcuts{text-align:center;font-family:var(--mono);font-size:10px;color:var(--t3);flex-shrink:0}
 .rv-shortcuts kbd{background:var(--bg3);border:1px solid var(--bd);border-radius:3px;padding:1px 6px;font-size:10px;margin:0 2px}
-
-.rv-done{text-align:center;padding:60px 20px}
-.rv-done-icon{font-size:48px;margin-bottom:16px}
-.rv-done h3{font-family:var(--mono);font-size:16px;font-weight:500;color:var(--t1);margin-bottom:8px}
+.rv-done{text-align:center;padding:60px 20px;display:none}
+.rv-done h3{font-family:var(--mono);font-size:16px;font-weight:500;margin-bottom:8px}
 .rv-done p{font-size:13px;color:var(--t2);line-height:1.7;margin-bottom:4px}
 .rv-done .rv-done-stats{display:flex;gap:20px;justify-content:center;margin:20px 0}
 .rv-done .rv-done-stat{text-align:center}
 .rv-done .rv-done-stat .num{font-family:var(--mono);font-size:24px;font-weight:700}
 .rv-done .rv-done-stat .label{font-family:var(--mono);font-size:9px;color:var(--t3);text-transform:uppercase}
+@media(max-width:960px){.main{grid-template-columns:1fr;grid-template-rows:1fr 1fr}.rp{border-left:none;border-top:1px solid var(--bd)}}
 </style>
 </head>
 <body>
-<div class="mo" id="modelOverlay"><div class="mlc"><div class="mls"></div><h3 id="loadingTitle">YOLOX-Tiny (ONNX) 読み込み中...</h3><p id="loadingMsg">モデルファイル（約20MB）をダウンロード中です。初回は時間がかかる場合があります。</p><div class="prog"><div class="prog-fill" id="loadProgress"></div></div></div></div>
-<header class="hdr"><div class="hdr-l"><div class="hdr-logo">🐦</div><div><div class="hdr-t">鳥検知・分析ツール</div><div class="hdr-s">v0.8 YOLOX-Tiny ONNX</div></div></div><span class="sb idle" id="statusBadge">STANDBY</span></header>
+<div class="mo" id="modelOverlay"><div class="mlc"><div class="mls"></div><h3 id="loadingTitle">COCO-SSD 読み込み中...</h3><p id="loadingMsg">初回は数秒かかります</p></div></div>
+<header class="hdr"><div class="hdr-l"><div class="hdr-logo">🐦</div><div><div class="hdr-t">鳥検知・分析ツール</div><div class="hdr-s">v0.9 Enhanced Motion Detection</div></div></div><div class="hdr-r"><span class="engine-badge" id="engineBadge" style="color:var(--green);border-color:var(--green)">COCO-SSD</span><span class="sb idle" id="statusBadge">STANDBY</span></div></header>
 <main class="main">
 <section class="vp">
   <div class="vw"><video id="videoPlayer" muted playsinline></video><canvas id="overlayCanvas"></canvas><canvas id="roiCanvas"></canvas>
@@ -207,31 +186,47 @@ body{font-family:var(--sans);background:var(--bg0);color:var(--t1);min-height:10
     <div class="cg"><label>間隔:</label><input type="number" id="intervalInput" value="3" min="0.5" max="60" step="0.5"><span>秒</span></div>
   </div>
   <div class="sr">
+    <!-- AI Engine -->
+    <div class="sc"><h4>AIエンジン <span class="tg at">切替</span></h4>
+      <div class="srow"><select id="aiEngine" style="width:100%" onchange="switchEngine()"><option value="cocossd" selected>COCO-SSD（デフォルト・軽量）</option><option value="onnx">YOLOX-Tiny ONNX（高精度）</option></select></div>
+      <div class="srow"><label>AI閾値:</label><input type="range" id="thresholdSlider" min="10" max="90" value="30"><span class="sv" id="thresholdVal">0.30</span></div>
+      <div class="srow"><label>AI対象:</label><select id="aiTarget"><option value="bird">birdのみ</option><option value="all_animal">全動物</option><option value="all">全クラス</option></select></div>
+    </div>
+    <!-- ROI -->
     <div class="sc"><h4>ROI <span class="tg rt">範囲</span></h4>
       <div class="srow"><label>モード:</label><select id="roiMode"><option value="include">範囲のみ</option><option value="exclude">範囲を除外</option></select></div>
       <div class="srow" style="justify-content:space-between"><span id="roiCount" style="color:var(--t3)">未設定</span><button class="b sec" style="padding:1px 5px;font-size:8px" onclick="clearAllRoi()">全クリア</button></div>
       <div class="roi-list" id="roiList"></div>
     </div>
+    <!-- Detection mode -->
     <div class="sc"><h4>検知モード</h4>
-      <div class="srow"><select id="detectMode" style="width:100%"><option value="motion">◎ 動体のみ</option><option value="ai">🤖 AIのみ (YOLOX)</option><option value="hybrid">🔀 ハイブリッド</option><option value="cropzoom" selected>🔍 クロップズーム（推奨）</option></select></div>
-      <div class="srow"><label>AI対象:</label><select id="aiTarget"><option value="bird">birdのみ</option><option value="all_animal">全動物</option><option value="all">全クラス</option></select></div>
-      <div class="srow"><label>AI閾値:</label><input type="range" id="thresholdSlider" min="10" max="90" value="30"><span class="sv" id="thresholdVal">0.30</span></div>
+      <div class="srow"><select id="detectMode" style="width:100%"><option value="motion" selected>◎ 動体検知のみ（推奨）</option><option value="ai">🤖 AIのみ</option><option value="hybrid">🔀 ハイブリッド</option><option value="cropzoom">🔍 クロップズーム</option></select></div>
     </div>
+    <!-- Motion basic -->
     <div class="sc"><h4>動体 <span class="tg mt">基本</span></h4>
       <div class="srow"><label>感度:</label><input type="range" id="motionSensitivity" min="5" max="80" value="25"><span class="sv" id="motionSensVal">25</span></div>
       <div class="srow"><label>最小:</label><input type="number" id="minArea" value="150" min="10" max="100000" step="10"><span style="color:var(--t3)">px²</span></div>
       <div class="srow"><label>最大:</label><input type="number" id="maxArea" value="50000" min="100" max="500000" step="100"><span style="color:var(--t3)">px²</span></div>
     </div>
+    <!-- Shadow filters -->
     <div class="sc"><h4>影対策 <span class="tg ft">FILTER</span></h4>
       <div class="srow"><label>背景学習:</label><input type="range" id="bgLearnRate" min="0" max="100" value="30"><span class="sv" id="bgLearnVal">0.30</span></div>
       <div class="srow"><label>ぼかし:</label><input type="range" id="blurRadius" min="0" max="5" value="2"><span class="sv" id="blurVal">2</span></div>
-      <div class="srow"><label>収縮膨張:</label><input type="range" id="morphSize" min="0" max="4" value="1"><span class="sv" id="morphVal">1</span></div>
-      <div class="srow"><label>輝度変化:</label><input type="range" id="brightnessReject" min="0" max="30" value="8"><span class="sv" id="brightVal">8</span></div>
-      <div class="srow"><label>縦横比:</label><input type="number" id="maxAspect" value="5" min="1" max="20" step="0.5"></div>
+      <div class="srow"><label>収縮膨張:</label><input type="range" id="morphSize" min="0" max="4" value="2"><span class="sv" id="morphVal">2</span></div>
+      <div class="srow"><label>輝度変化:</label><input type="range" id="brightnessReject" min="0" max="30" value="10"><span class="sv" id="brightVal">10</span></div>
+      <div class="srow"><label>縦横比:</label><input type="number" id="maxAspect" value="4" min="1" max="20" step="0.5"></div>
       <div class="srow"><label>連続回数:</label><input type="number" id="persistFrames" value="2" min="1" max="10"></div>
     </div>
+    <!-- NEW: Advanced motion filters -->
+    <div class="sc"><h4>高度フィルタ <span class="tg nt">NEW</span></h4>
+      <div class="srow"><label>揺らめき除外:</label><input type="checkbox" id="filterOscillation" checked><span style="color:var(--t3);font-size:8px">同位置反復を除外</span></div>
+      <div class="srow"><label>充填率:</label><input type="range" id="fillRatioMin" min="5" max="80" value="15"><span class="sv" id="fillRatioVal">15%</span></div>
+      <div class="srow"><label>エッジ密度:</label><input type="range" id="edgeDensityMin" min="0" max="50" value="8"><span class="sv" id="edgeDensityVal">8%</span></div>
+      <div class="srow"><label>ゾーン冷却:</label><input type="checkbox" id="filterHotzone" checked><span style="color:var(--t3);font-size:8px">高頻度エリア減衰</span></div>
+    </div>
+    <!-- Crop-zoom -->
     <div class="sc"><h4>クロップズーム <span class="tg zt">ZOOM</span></h4>
-      <div class="srow"><label>拡大サイズ:</label><input type="number" id="cropZoomSize" value="300" min="100" max="640" step="10"><span style="color:var(--t3)">px</span></div>
+      <div class="srow"><label>拡大:</label><input type="number" id="cropZoomSize" value="300" min="100" max="640" step="10"><span style="color:var(--t3)">px</span></div>
       <div class="srow"><label>マージン:</label><input type="range" id="cropMargin" min="0" max="100" value="40"><span class="sv" id="cropMarginVal">40%</span></div>
     </div>
   </div>
@@ -245,523 +240,289 @@ body{font-family:var(--sans);background:var(--bg0);color:var(--t1);min-height:10
     <div class="si"><div class="sv2" id="statIncorrect">0</div><div class="sl">誤検知</div></div>
   </div>
   <div class="lc" id="logContainer"><div class="le-empty" id="logEmpty"><div class="le-icon">🔍</div><div>検知を開始するとログが表示されます</div></div></div>
-  <div class="pf"><button class="b sec" onclick="openReview()" id="btnReview" disabled>👁 レビュー</button><button class="b sec" onclick="exportCSV()">📥 CSV</button><button class="b sec" onclick="clearLog()">🗑 クリア</button></div>
+  <div class="pf"><button class="b sec" id="btnReview" disabled onclick="openReview()">👁 レビュー</button><button class="b sec" onclick="exportCSV()">📥 CSV</button><button class="b sec" onclick="clearLog()">🗑</button></div>
 </section>
 </main>
-
-<!-- REVIEW MODE OVERLAY -->
+<!-- Review overlay -->
 <div class="rv-overlay" id="reviewOverlay">
-  <div class="rv-header">
-    <h3>👁 プレビューレビュー</h3>
-    <div class="rv-progress-bar"><div class="rv-progress-fill" id="rvProgressFill"></div></div>
-    <span class="rv-progress-text" id="rvProgressText">0 / 0</span>
-    <button class="rv-close" onclick="closeReview()">✕ 閉じる (Esc)</button>
-  </div>
+  <div class="rv-header"><h3>👁 プレビューレビュー</h3><div class="rv-progress-bar"><div class="rv-progress-fill" id="rvProgressFill"></div></div><span class="rv-progress-text" id="rvProgressText">0/0</span><button class="rv-close" onclick="closeReview()">✕ 閉じる</button></div>
   <div class="rv-body" id="rvBody">
-    <button class="rv-nav-btn" id="rvPrev" onclick="rvNavigate(-1)">‹</button>
-    <div class="rv-card" id="rvCard">
-      <div class="rv-preview" id="rvPreview">
-        <canvas id="rvCanvas" width="640" height="360"></canvas>
-        <span class="rv-time" id="rvTime">00:00:00</span>
-        <span class="rv-det-count" id="rvDetCount">0</span>
-        <span class="rv-status-badge unmarked" id="rvStatusBadge">未判定</span>
-      </div>
-      <div class="rv-info">
-        <span class="rv-classes" id="rvClasses"></span>
-        <div class="rv-methods" id="rvMethods"></div>
-      </div>
+    <button class="rv-nav-btn" id="rvPrev" onclick="rvNav(-1)">‹</button>
+    <div class="rv-card">
+      <div class="rv-preview"><canvas id="rvCanvas"></canvas><span class="rv-time" id="rvTime">00:00:00</span><span class="rv-det-count" id="rvDetCount">0</span><span class="rv-status-badge unmarked" id="rvBadge">未判定</span></div>
+      <div class="rv-info"><span class="rv-classes" id="rvClasses"></span></div>
       <div class="rv-actions">
-        <button class="rv-action-btn incorrect-btn" id="rvBtnIncorrect" onclick="rvMark('incorrect')">✕</button>
-        <button class="rv-action-btn skip-btn" onclick="rvNavigate(1)">▸</button>
-        <button class="rv-action-btn correct-btn" id="rvBtnCorrect" onclick="rvMark('correct')">○</button>
+        <button class="rv-action-btn incorrect-btn" id="rvBtnX" onclick="rvMark('incorrect')">✕</button>
+        <button class="rv-action-btn skip-btn" onclick="rvNav(1)">▸</button>
+        <button class="rv-action-btn correct-btn" id="rvBtnO" onclick="rvMark('correct')">○</button>
       </div>
-      <div class="rv-shortcuts">
-        <kbd>←</kbd> 前へ &nbsp; <kbd>→</kbd> 次へ &nbsp; <kbd>O</kbd> 正検知 &nbsp; <kbd>X</kbd> 誤検知 &nbsp; <kbd>Space</kbd> スキップ &nbsp; <kbd>Esc</kbd> 閉じる
-      </div>
+      <div class="rv-shortcuts"><kbd>←</kbd> 前 <kbd>→</kbd> 次 <kbd>O</kbd> 正検知 <kbd>X</kbd> 誤検知 <kbd>Space</kbd> スキップ <kbd>Esc</kbd> 閉じる</div>
     </div>
-    <button class="rv-nav-btn" id="rvNext" onclick="rvNavigate(1)">›</button>
+    <button class="rv-nav-btn" id="rvNext" onclick="rvNav(1)">›</button>
   </div>
-  <!-- Done screen -->
-  <div class="rv-done" id="rvDone" style="display:none">
-    <div class="rv-done-icon">✅</div>
-    <h3>レビュー完了</h3>
-    <div class="rv-done-stats">
-      <div class="rv-done-stat"><div class="num" style="color:var(--cyan)" id="rvDoneTotal">0</div><div class="label">全グループ</div></div>
-      <div class="rv-done-stat"><div class="num" style="color:var(--green)" id="rvDoneCorrect">0</div><div class="label">正検知</div></div>
-      <div class="rv-done-stat"><div class="num" style="color:var(--red)" id="rvDoneIncorrect">0</div><div class="label">誤検知</div></div>
-      <div class="rv-done-stat"><div class="num" style="color:var(--t3)" id="rvDoneSkipped">0</div><div class="label">未判定</div></div>
-    </div>
-    <p>CSV出力でフィードバック結果をダウンロードできます</p>
-    <div style="margin-top:16px;display:flex;gap:10px;justify-content:center">
-      <button class="b sec" onclick="exportCSV();closeReview()">📥 CSV出力して閉じる</button>
-      <button class="b sec" onclick="rvGoToIndex(0)">最初から再レビュー</button>
-      <button class="b sec" onclick="closeReview()">閉じる</button>
-    </div>
-  </div>
+  <div class="rv-done" id="rvDone"><h3>✅ レビュー完了</h3><div class="rv-done-stats"><div class="rv-done-stat"><div class="num" style="color:var(--cyan)" id="rvDT">0</div><div class="label">全体</div></div><div class="rv-done-stat"><div class="num" style="color:var(--green)" id="rvDC">0</div><div class="label">正検知</div></div><div class="rv-done-stat"><div class="num" style="color:var(--red)" id="rvDI">0</div><div class="label">誤検知</div></div></div><div style="display:flex;gap:10px;justify-content:center"><button class="b sec" onclick="exportCSV();closeReview()">📥 CSV出力</button><button class="b sec" onclick="rvGoTo(0)">再レビュー</button><button class="b sec" onclick="closeReview()">閉じる</button></div></div>
 </div>
+
 <script>
-// ============================================================
-//  【設定】モデルファイルのURL
-//  ※ ここを自分のホスティング先に変更してください
-//
-//  例1: GitHub Releasesに置いた場合
-//    const MODEL_URL = 'https://github.com/your-org/bird-detector/releases/download/v1.0/yolox_tiny.onnx';
-//
-//  例2: 同じフォルダに置いた場合
-//    const MODEL_URL = './yolox_tiny.onnx';
-//
-//  例3: Hugging Faceに置いた場合
-//    const MODEL_URL = 'https://huggingface.co/pinto0309/yolox/resolve/main/yolox_tiny_416.onnx';
-//
-//  ※ モデルの入手方法は下記「セットアップガイド」を参照
-// ============================================================
-const MODEL_URL = './yolox_tiny.onnx';
-
-// ============================================================
-//  【変更点2/5】YOLOX-Tiny の仕様定数
-//
-//  COCO-SSD では全て内部で処理されていたが、
-//  ONNXモデルでは自分で前処理・後処理を書く必要がある。
-//  これらの定数はモデルの仕様に合わせて設定する。
-// ============================================================
-const INPUT_SIZE   = 416;    // YOLOX-Tiny の入力画像サイズ (416x416)
-const NUM_CLASSES  = 80;     // COCO データセットのクラス数
-const NMS_THRESH   = 0.45;   // NMS（重複除去）の IoU 閾値
-const STRIDES      = [8, 16, 32]; // YOLOX の3段階の特徴マップストライド
-
-// COCOデータセットの80クラス名（YOLOX出力のインデックスに対応）
-const COCO_CLASSES = [
-  'person','bicycle','car','motorcycle','airplane','bus','train','truck','boat',
-  'traffic light','fire hydrant','stop sign','parking meter','bench','bird','cat',
-  'dog','horse','sheep','cow','elephant','bear','zebra','giraffe','backpack',
-  'umbrella','handbag','tie','suitcase','frisbee','skis','snowboard','sports ball',
-  'kite','baseball bat','baseball glove','skateboard','surfboard','tennis racket',
-  'bottle','wine glass','cup','fork','knife','spoon','bowl','banana','apple',
-  'sandwich','orange','broccoli','carrot','hot dog','pizza','donut','cake','chair',
-  'couch','potted plant','bed','dining table','toilet','tv','laptop','mouse',
-  'remote','keyboard','cell phone','microwave','oven','toaster','sink',
-  'refrigerator','book','clock','vase','scissors','teddy bear','hair drier','toothbrush'
-];
-// bird = index 14, cat = 15, dog = 16 ...
-const ANIMALS = [14,15,16,17,18,19,20,21,22,23]; // bird〜giraffe
-
-// ============================================================
-//  共通State（v0.7と同じ）
-// ============================================================
 const $=id=>document.getElementById(id);
-let onnxSession=null,isDetecting=false,isFastScanning=false,animFrameId=null,scanAbortController=null;
+
+// ============================================================
+//  AIエンジン管理: COCO-SSD と ONNX の切替
+// ============================================================
+let cocoModel=null, onnxSession=null;
+let currentEngine='cocossd'; // 'cocossd' | 'onnx'
+const ONNX_MODEL_URL='./yolox_tiny.onnx';
+const INPUT_SIZE=416, NUM_CLASSES=80, NMS_THRESH=0.45;
+const COCO_CLASSES=['person','bicycle','car','motorcycle','airplane','bus','train','truck','boat','traffic light','fire hydrant','stop sign','parking meter','bench','bird','cat','dog','horse','sheep','cow','elephant','bear','zebra','giraffe','backpack','umbrella','handbag','tie','suitcase','frisbee','skis','snowboard','sports ball','kite','baseball bat','baseball glove','skateboard','surfboard','tennis racket','bottle','wine glass','cup','fork','knife','spoon','bowl','banana','apple','sandwich','orange','broccoli','carrot','hot dog','pizza','donut','cake','chair','couch','potted plant','bed','dining table','toilet','tv','laptop','mouse','remote','keyboard','cell phone','microwave','oven','toaster','sink','refrigerator','book','clock','vase','scissors','teddy bear','hair drier','toothbrush'];
+const ANIMAL_IDX=[14,15,16,17,18,19,20,21,22,23];
+const ANIMAL_NAMES=['bird','cat','dog','horse','sheep','cow','elephant','bear','zebra','giraffe'];
+
+async function loadModel(){
+  try{
+    $('loadingTitle').textContent='COCO-SSD 読み込み中...';
+    cocoModel=await cocoSsd.load();
+    currentEngine='cocossd';
+    $('engineBadge').textContent='COCO-SSD';
+    $('engineBadge').style.color='var(--green)';$('engineBadge').style.borderColor='var(--green)';
+    $('modelOverlay').classList.add('hidden');
+    setStatus('idle','STANDBY');
+  }catch(e){$('loadingTitle').textContent='エラー: '+e.message}
+}
+
+async function switchEngine(){
+  const sel=$('aiEngine').value;
+  if(sel===currentEngine)return;
+  if(sel==='onnx'&&!onnxSession){
+    $('engineBadge').textContent='ONNX 読込中...';
+    $('engineBadge').style.color='var(--amber)';$('engineBadge').style.borderColor='var(--amber)';
+    try{
+      ort.env.wasm.numThreads=Math.min(navigator.hardwareConcurrency||4,4);
+      let s=null;
+      if('gpu' in navigator)try{s=await ort.InferenceSession.create(ONNX_MODEL_URL,{executionProviders:['webgpu'],graphOptimizationLevel:'all'})}catch(e){s=null}
+      if(!s)try{s=await ort.InferenceSession.create(ONNX_MODEL_URL,{executionProviders:['webgl'],graphOptimizationLevel:'all'})}catch(e){s=null}
+      if(!s)s=await ort.InferenceSession.create(ONNX_MODEL_URL,{executionProviders:['wasm'],graphOptimizationLevel:'all'});
+      onnxSession=s;
+    }catch(e){alert('ONNXモデル読込失敗: '+e.message+'\n\nyolox_tiny.onnx を同じフォルダに配置してください');$('aiEngine').value='cocossd';return}
+  }
+  currentEngine=sel;
+  $('engineBadge').textContent=sel==='cocossd'?'COCO-SSD':'YOLOX ONNX';
+  $('engineBadge').style.color=sel==='cocossd'?'var(--green)':'var(--cyan)';
+  $('engineBadge').style.borderColor=sel==='cocossd'?'var(--green)':'var(--cyan)';
+}
+
+// ============================================================
+//  統合 AI検知: エンジンに応じて自動切替
+// ============================================================
+async function detectAI(source,threshold){
+  if(currentEngine==='cocossd') return detectCOCO(source,threshold);
+  return detectONNX(source,threshold);
+}
+
+// COCO-SSD
+async function detectCOCO(src,thr){
+  if(!cocoModel)return[];
+  const preds=await cocoModel.detect(src);
+  const t=$('aiTarget').value;
+  let r=preds.filter(p=>{if(p.score<thr)return false;if(t==='bird')return p.class==='bird';if(t==='all_animal')return ANIMAL_NAMES.includes(p.class);return true}).map(p=>({bbox:p.bbox,class:p.class,score:p.score,method:'ai'}));
+  if(roiMask&&roiZones.length){const W=videoPlayer.videoWidth;r=r.filter(d=>{const idx=Math.round(d.bbox[1]+d.bbox[3]/2)*W+Math.round(d.bbox[0]+d.bbox[2]/2);return idx>=0&&idx<roiMask.length&&roiMask[idx]===1})}
+  return r;
+}
+
+// ONNX (YOLOX)
+let preCanvas=null,preCtx=null;
+function preprocessYOLOX(source){
+  if(!preCanvas){preCanvas=document.createElement('canvas');preCanvas.width=INPUT_SIZE;preCanvas.height=INPUT_SIZE;preCtx=preCanvas.getContext('2d',{willReadFrequently:true})}
+  const sw=source.videoWidth||source.width,sh=source.videoHeight||source.height;
+  const scale=Math.min(INPUT_SIZE/sw,INPUT_SIZE/sh),nw=Math.round(sw*scale),nh=Math.round(sh*scale);
+  const px=(INPUT_SIZE-nw)/2,py=(INPUT_SIZE-nh)/2;
+  preCtx.fillStyle='rgb(114,114,114)';preCtx.fillRect(0,0,INPUT_SIZE,INPUT_SIZE);
+  preCtx.drawImage(source,0,0,sw,sh,px,py,nw,nh);
+  const d=preCtx.getImageData(0,0,INPUT_SIZE,INPUT_SIZE).data;const tp=INPUT_SIZE*INPUT_SIZE;
+  const f=new Float32Array(3*tp);
+  for(let i=0;i<tp;i++){const j=i*4;f[i]=d[j];f[i+tp]=d[j+1];f[i+tp*2]=d[j+2]}
+  return{tensor:new ort.Tensor('float32',f,[1,3,INPUT_SIZE,INPUT_SIZE]),scale,padX:px,padY:py};
+}
+function postprocessYOLOX(data,thr,scale,px,py,ow,oh){
+  const target=$('aiTarget').value;const n=data.length/(NUM_CLASSES+5);const results=[];
+  for(let i=0;i<n;i++){const o=i*(NUM_CLASSES+5);const obj=data[o+4];if(obj<.1)continue;
+    let mc=0,mi=0;for(let c=0;c<NUM_CLASSES;c++){const s=data[o+5+c];if(s>mc){mc=s;mi=c}}
+    const fs=obj*mc;if(fs<thr)continue;
+    if(target==='bird'&&mi!==14)continue;if(target==='all_animal'&&!ANIMAL_IDX.includes(mi))continue;
+    const cx=data[o],cy=data[o+1],w=data[o+2],h=data[o+3];
+    const x1=(cx-w/2-px)/scale,y1=(cy-h/2-py)/scale,bw=w/scale,bh=h/scale;
+    const fx=Math.max(0,x1),fy=Math.max(0,y1),fw=Math.min(ow-fx,bw),fh=Math.min(oh-fy,bh);
+    if(fw>0&&fh>0)results.push({bbox:[fx,fy,fw,fh],class:COCO_CLASSES[mi],score:fs,method:'ai'})}
+  return nmsFilter(results,NMS_THRESH);
+}
+async function detectONNX(src,thr){
+  if(!onnxSession)return[];const sw=src.videoWidth||src.width,sh=src.videoHeight||src.height;if(!sw)return[];
+  const{tensor,scale,padX,padY}=preprocessYOLOX(src);
+  const res=await onnxSession.run({[onnxSession.inputNames[0]]:tensor});
+  let det=postprocessYOLOX(res[onnxSession.outputNames[0]].data,thr,scale,padX,padY,sw,sh);
+  if(roiMask&&roiZones.length){const W=sw;det=det.filter(d=>{const idx=Math.round(d.bbox[1]+d.bbox[3]/2)*W+Math.round(d.bbox[0]+d.bbox[2]/2);return idx>=0&&idx<roiMask.length&&roiMask[idx]===1})}
+  return det;
+}
+function nmsFilter(dets,iouThr){if(!dets.length)return[];dets.sort((a,b)=>b.score-a.score);const kept=[];const sup=new Set();for(let i=0;i<dets.length;i++){if(sup.has(i))continue;kept.push(dets[i]);for(let j=i+1;j<dets.length;j++){if(!sup.has(j)&&iou(dets[i].bbox,dets[j].bbox)>iouThr)sup.add(j)}}return kept}
+function iou(a,b){const ix=Math.max(0,Math.min(a[0]+a[2],b[0]+b[2])-Math.max(a[0],b[0])),iy=Math.max(0,Math.min(a[1]+a[3],b[1]+b[3])-Math.max(a[1],b[1])),i=ix*iy,u=a[2]*a[3]+b[2]*b[3]-i;return u>0?i/u:0}
+
+// Crop-zoom (uses current AI engine)
+let cropCanvas=null,cropCtx=null;
+async function cropZoomDetect(video,motionR,thr){
+  if((!cocoModel&&!onnxSession)||!motionR.length)return[];
+  const vw=video.videoWidth,vh=video.videoHeight;const zs=parseInt($('cropZoomSize').value)||300;const mp=(parseInt($('cropMargin').value)||40)/100;
+  if(!cropCanvas){cropCanvas=document.createElement('canvas');cropCtx=cropCanvas.getContext('2d')}cropCanvas.width=zs;cropCanvas.height=zs;
+  const results=[];
+  for(const mr of motionR){
+    const[bx,by,bw,bh]=mr.bbox;const mx=bw*mp,my=bh*mp;
+    let sx=Math.max(0,bx-mx),sy=Math.max(0,by-my),sw=Math.min(vw-sx,bw+mx*2),sh=Math.min(vh-sy,bh+my*2);
+    const side=Math.max(sw,sh);sx=Math.max(0,sx-(side-sw)/2);sy=Math.max(0,sy-(side-sh)/2);sw=Math.min(vw-sx,side);sh=Math.min(vh-sy,side);
+    cropCtx.clearRect(0,0,zs,zs);cropCtx.drawImage(video,sx,sy,sw,sh,0,0,zs,zs);
+    const preds=await detectAI(cropCanvas,thr);
+    for(const p of preds){const rx=sw/zs,ry=sh/zs;results.push({bbox:[sx+p.bbox[0]*rx,sy+p.bbox[1]*ry,p.bbox[2]*rx,p.bbox[3]*ry],class:p.class,score:p.score,method:'zoom',area:mr.area})}
+  }
+  return results;
+}
+
+// ============================================================
+//  強化版 動体検知
+// ============================================================
+let isDetecting=false,isFastScanning=false,animFrameId=null,scanAbortController=null;
 let fpsHistory=[],lastFpsUpdate=0,videoLoaded=false;
 let workCanvas=null,workCtx=null;
 let roiZones=[],isRoiMode=false,roiDrawing=false,roiStartX=0,roiStartY=0,roiMask=null;
 let bgModel=null,persistGrid=null,persistGridCols=0;
 let groups=[],groupId=0,lastLogTime=-1;
 let snapCanvas=null,snapCtx=null;
-let cropCanvas=null,cropCtx=null;
-// 前処理用キャンバス（ONNX専用）
-let preCanvas=null,preCtx=null;
+
+// 高度フィルタ用
+let oscillationMap=null; // 揺らめき検知: グリッドごとの出現/消失カウント
+let hotzoneMap=null;     // ゾーン冷却: グリッドごとの累積検知回数
 
 const DEDUP_INTERVAL=1,CELL_SIZE=4;
 const ROI_COLORS=['#22c55e','#06b6d4','#f59e0b','#a855f7','#ef4444','#ec4899'];
 const videoPlayer=$('videoPlayer'),overlayCanvas=$('overlayCanvas'),ctx=overlayCanvas.getContext('2d');
 const roiCanvas=$('roiCanvas'),roiCtx=roiCanvas.getContext('2d');
 
-// ============================================================
-//  【変更点3/5】モデル読み込み
-//
-//  以前:  model = await cocoSsd.load();  ← 1行で完了
-//
-//  今回:  ONNX Runtime のセッションを作成する。
-//         WebAssembly (WASM) バックエンドを使用。
-//         GPUは不要でCPUのみで動作する。
-// ============================================================
-// 使用中のバックエンド名（UIに表示用）
-let activeBackend = 'unknown';
+function initWork(w,h){if(!workCanvas||workCanvas.width!==w||workCanvas.height!==h){workCanvas=document.createElement('canvas');workCanvas.width=w;workCanvas.height=h;workCtx=workCanvas.getContext('2d',{willReadFrequently:true});bgModel=null;persistGrid=null;oscillationMap=null;hotzoneMap=null}}
+function capGray(v){const w=v.videoWidth,h=v.videoHeight;initWork(w,h);workCtx.drawImage(v,0,0,w,h);const d=workCtx.getImageData(0,0,w,h).data,g=new Float32Array(w*h);for(let i=0;i<g.length;i++){const j=i*4;g[i]=(d[j]*77+d[j+1]*150+d[j+2]*29)/256}return{gray:g,width:w,height:h}}
+function boxBlur(s,w,h,r){if(r<=0)return s;let d=new Float32Array(s.length);for(let p=0;p<r;p++){const inp=p===0?s:d;for(let y=0;y<h;y++)for(let x=0;x<w;x++){let sum=0,c=0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const nx=x+dx,ny=y+dy;if(nx>=0&&nx<w&&ny>=0&&ny<h){sum+=inp[ny*w+nx];c++}}d[y*w+x]=sum/c}}return d}
+function morph(bin,w,h,sz){if(sz<=0)return bin;let c=bin;for(let p=0;p<sz;p++){const e=new Uint8Array(w*h);for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++)if(c[y*w+x]&&c[(y-1)*w+x]&&c[(y+1)*w+x]&&c[y*w+x-1]&&c[y*w+x+1])e[y*w+x]=255;c=e}for(let p=0;p<sz;p++){const d=new Uint8Array(w*h);for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++)if(c[y*w+x]||c[(y-1)*w+x]||c[(y+1)*w+x]||c[y*w+x-1]||c[y*w+x+1])d[y*w+x]=255;c=d}return c}
 
-async function loadModel(){
-  try{
-    $('loadingTitle').textContent='YOLOX-Tiny (ONNX) 読み込み中...';
-    $('loadingMsg').textContent='最適な実行環境を検出中...';
-
-    // WASM (CPU) の設定: マルチスレッド + SIMD で高速化
-    ort.env.wasm.numThreads = Math.min(navigator.hardwareConcurrency || 4, 4);
-
-    // ============================================================
-    //  バックエンド自動選択（高速化のキモ）
-    //
-    //  優先順: WebGPU → WebGL → WASM (CPU)
-    //
-    //  WebGPU: ブラウザ内でGPUを使える最新API。
-    //          Chrome 113+, Edge 113+ で対応。
-    //          対応していれば WASM の 5〜10倍速い。
-    //
-    //  WebGL:  WebGPU非対応の場合のGPUフォールバック。
-    //          ほぼ全てのブラウザで動作。
-    //
-    //  WASM:   GPU が使えない場合のCPUフォールバック。
-    //          最も遅いが、確実に動作する。
-    // ============================================================
-    let session = null;
-
-    // --- 試行1: WebGPU ---
-    if ('gpu' in navigator) {
-      try {
-        $('loadingMsg').textContent='WebGPU (GPU高速モード) を試行中...';
-        session = await ort.InferenceSession.create(MODEL_URL, {
-          executionProviders: ['webgpu'],
-          graphOptimizationLevel: 'all'
-        });
-        activeBackend = 'WebGPU';
-        console.log('Using WebGPU backend (fastest)');
-      } catch(e) {
-        console.warn('WebGPU failed, trying WebGL...', e.message);
-        session = null;
-      }
-    }
-
-    // --- 試行2: WebGL ---
-    if (!session) {
-      try {
-        $('loadingMsg').textContent='WebGL (GPU) を試行中...';
-        session = await ort.InferenceSession.create(MODEL_URL, {
-          executionProviders: ['webgl'],
-          graphOptimizationLevel: 'all'
-        });
-        activeBackend = 'WebGL';
-        console.log('Using WebGL backend');
-      } catch(e) {
-        console.warn('WebGL failed, falling back to WASM...', e.message);
-        session = null;
-      }
-    }
-
-    // --- 試行3: WASM (CPU) 最終フォールバック ---
-    if (!session) {
-      $('loadingMsg').textContent='WASM (CPU) で読み込み中...';
-      session = await ort.InferenceSession.create(MODEL_URL, {
-        executionProviders: ['wasm'],
-        graphOptimizationLevel: 'all'
-      });
-      activeBackend = 'WASM';
-      console.log('Using WASM backend (CPU, slowest)');
-    }
-
-    onnxSession = session;
-    console.log('ONNX session created. Backend:', activeBackend, 'Inputs:', onnxSession.inputNames, 'Outputs:', onnxSession.outputNames);
-    $('modelOverlay').classList.add('hidden');
-
-    // バックエンド情報をヘッダー横に表示
-    const backendColors = { 'WebGPU': 'var(--green)', 'WebGL': 'var(--cyan)', 'WASM': 'var(--amber)' };
-    const backendLabels = { 'WebGPU': 'GPU (WebGPU)', 'WebGL': 'GPU (WebGL)', 'WASM': 'CPU (WASM)' };
-    const speedHints = { 'WebGPU': '高速', 'WebGL': '中速', 'WASM': '低速' };
-    $('statusBadge').insertAdjacentHTML('beforebegin',
-      `<span style="font-family:var(--mono);font-size:9px;padding:2px 8px;border-radius:10px;background:${backendColors[activeBackend]}22;color:${backendColors[activeBackend]};border:1px solid ${backendColors[activeBackend]}44">${backendLabels[activeBackend]} ${speedHints[activeBackend]}</span>`
-    );
-
-    setStatus('idle','STANDBY');
-  } catch(e) {
-    console.error('Model load error:', e);
-    $('loadingTitle').textContent='モデル読み込みエラー';
-    $('loadingMsg').innerHTML=`
-      <div style="color:var(--red);margin-bottom:8px">${e.message}</div>
-      <div style="text-align:left;font-size:9px;line-height:1.8">
-        <b>よくある原因:</b><br>
-        1. モデルファイル (yolox_tiny.onnx) が見つからない<br>
-        2. CORSエラー（別ドメインからの読み込み制限）<br>
-        3. ファイルが壊れている<br><br>
-        <b>解決方法:</b><br>
-        ・ yolox_tiny.onnx をこのHTMLと同じフォルダに置く<br>
-        ・ またはMODEL_URL を正しいパスに変更する
-      </div>`;
+// エッジ密度計算: bbox内のエッジピクセル割合
+function calcEdgeDensity(gray,w,h,bbox){
+  const[bx,by,bw,bh]=bbox;const x0=Math.max(1,Math.round(bx)),y0=Math.max(1,Math.round(by));
+  const x1=Math.min(w-1,Math.round(bx+bw)),y1=Math.min(h-1,Math.round(by+bh));
+  let edgeCount=0,total=0;
+  for(let y=y0;y<y1;y+=2)for(let x=x0;x<x1;x+=2){
+    const gx=Math.abs(gray[y*w+x+1]-gray[y*w+x-1]);
+    const gy=Math.abs(gray[(y+1)*w+x]-gray[(y-1)*w+x]);
+    if(gx+gy>30)edgeCount++;total++;
   }
+  return total>0?edgeCount/total:0;
 }
 
-// ============================================================
-//  【変更点4/5】前処理 (Preprocessing)
-//
-//  COCO-SSD: 前処理は不要（内部で自動実行）
-//  YOLOX:    以下の手順が必要
-//
-//  手順:
-//    1. 映像フレームを取得
-//    2. アスペクト比を保ったまま 416x416 にリサイズ
-//       （余白はグレー(114,114,114)で埋める = "letterbox"）
-//    3. ピクセルデータを [R,G,B] → [1, 3, 416, 416] の
-//       Float32Array に変換（"CHW形式" = チャンネルが先）
-//    4. 値の範囲は 0〜255 のまま（正規化不要）
-// ============================================================
-
-/**
- * 映像フレームを YOLOX の入力テンソルに変換する
- * @param {HTMLVideoElement|HTMLCanvasElement} source - 入力ソース
- * @returns {{ tensor: ort.Tensor, scale: number, padX: number, padY: number }}
- *   tensor: ONNX に渡す入力テンソル
- *   scale, padX, padY: 後処理で座標を元画像に戻すための情報
- */
-function preprocessForYOLOX(source) {
-  // --- ステップ1: 前処理用キャンバスの初期化 ---
-  if (!preCanvas) {
-    preCanvas = document.createElement('canvas');
-    preCanvas.width = INPUT_SIZE;   // 416
-    preCanvas.height = INPUT_SIZE;  // 416
-    preCtx = preCanvas.getContext('2d', { willReadFrequently: true });
+// 充填率計算: bboxに対する実際の動体ピクセル割合
+function calcFillRatio(cleaned,w,bbox){
+  const[bx,by,bw,bh]=bbox;const x0=Math.round(bx),y0=Math.round(by);
+  const x1=Math.round(bx+bw),y1=Math.round(by+bh);
+  let filled=0,total=0;
+  for(let y=y0;y<y1;y++)for(let x=x0;x<x1;x++){
+    if(x>=0&&x<w&&cleaned[y*w+x])filled++;total++;
   }
-
-  // --- ステップ2: レターボックスリサイズ ---
-  // 元の映像サイズ
-  const srcW = source.videoWidth || source.width;
-  const srcH = source.videoHeight || source.height;
-
-  // アスペクト比を保つスケール計算
-  // 例: 1920x1080 の映像 → scale = min(416/1920, 416/1080) = 0.2167
-  const scale = Math.min(INPUT_SIZE / srcW, INPUT_SIZE / srcH);
-  const newW = Math.round(srcW * scale);  // リサイズ後の幅
-  const newH = Math.round(srcH * scale);  // リサイズ後の高さ
-
-  // パディング量（余白の大きさ）
-  const padX = (INPUT_SIZE - newW) / 2;   // 左右の余白
-  const padY = (INPUT_SIZE - newH) / 2;   // 上下の余白
-
-  // グレー(114,114,114)で塗りつぶし → リサイズ画像を中央に描画
-  preCtx.fillStyle = 'rgb(114,114,114)';
-  preCtx.fillRect(0, 0, INPUT_SIZE, INPUT_SIZE);
-  preCtx.drawImage(source, 0, 0, srcW, srcH, padX, padY, newW, newH);
-
-  // --- ステップ3: ピクセルデータ → CHW形式 Float32Array ---
-  // ブラウザの Canvas は [R,G,B,A, R,G,B,A, ...] の並び（HWC形式）
-  // YOLOX は [R全画素, G全画素, B全画素] の並び（CHW形式）を要求
-  const imgData = preCtx.getImageData(0, 0, INPUT_SIZE, INPUT_SIZE).data;
-  const totalPixels = INPUT_SIZE * INPUT_SIZE;  // 416 * 416 = 173,056
-  const float32 = new Float32Array(3 * totalPixels);  // 3チャンネル × 全画素
-
-  for (let i = 0; i < totalPixels; i++) {
-    const srcIdx = i * 4;  // RGBA の4バイト刻み
-    float32[i]                    = imgData[srcIdx];     // R チャンネル
-    float32[i + totalPixels]      = imgData[srcIdx + 1]; // G チャンネル
-    float32[i + totalPixels * 2]  = imgData[srcIdx + 2]; // B チャンネル
-    // 値は 0〜255 のまま（YOLOXは正規化不要）
-  }
-
-  // --- ステップ4: ONNX Tensor オブジェクトを作成 ---
-  // shape: [バッチサイズ=1, チャンネル数=3, 高さ=416, 幅=416]
-  const tensor = new ort.Tensor('float32', float32, [1, 3, INPUT_SIZE, INPUT_SIZE]);
-
-  return { tensor, scale, padX, padY };
+  return total>0?filled/total:0;
 }
 
-// ============================================================
-//  【変更点5/5】後処理 (Postprocessing) + NMS
-//
-//  COCO-SSD: 後処理は不要（ [{class:'bird', score:0.9, bbox:[...]}] が直接返る）
-//  YOLOX:    生の出力テンソルを自分で解析する必要がある
-//
-//  YOLOX出力形式: [1, 3549, 85]
-//    3549 = 検出候補の数 (52*52 + 26*26 + 13*13)
-//    85   = cx, cy, w, h (4) + objectness (1) + 80クラススコア
-//
-//  手順:
-//    1. 各候補のスコア = objectness × max(クラススコア)
-//    2. 閾値以下を除外
-//    3. NMS（重複するボックスを除去）
-//    4. 座標を元の映像サイズに変換
-// ============================================================
+function detectMotion(video){
+  const{gray,width,height}=capGray(video);const sens=parseInt($('motionSensitivity').value),thr=80-sens;
+  const minA=parseInt($('minArea').value)||150,maxA=parseInt($('maxArea').value)||50000;
+  const lr=parseInt($('bgLearnRate').value)/100,blR=parseInt($('blurRadius').value),morSz=parseInt($('morphSize').value);
+  const brRej=parseInt($('brightnessReject').value),maxAsp=parseFloat($('maxAspect').value)||4,persReq=parseInt($('persistFrames').value)||2;
+  // 高度フィルタ設定
+  const useOscFilter=$('filterOscillation').checked;
+  const minFillRatio=(parseInt($('fillRatioMin').value)||15)/100;
+  const minEdgeDensity=(parseInt($('edgeDensityMin').value)||8)/100;
+  const useHotzone=$('filterHotzone').checked;
 
-/**
- * YOLOX の生出力を検知結果に変換する
- */
-function postprocessYOLOX(outputData, threshold, scale, padX, padY, origW, origH) {
-  const targetMode = $('aiTarget').value;
-  const numPreds = outputData.length / (NUM_CLASSES + 5); // 3549
-  const results = [];
+  const bl=boxBlur(gray,width,height,blR);
+  if(!bgModel||bgModel.length!==bl.length){bgModel=new Float32Array(bl);return[]}
+  let sC=0,sB=0;const step=Math.max(1,(bl.length/10000)|0);for(let i=0;i<bl.length;i+=step){sC+=bl[i];sB+=bgModel[i]}
+  if(brRej>0&&Math.abs(sC-sB)/(bl.length/step)>brRej){for(let i=0;i<bgModel.length;i++)bgModel[i]=bgModel[i]*.5+bl[i]*.5;return[]}
+  const diff=new Float32Array(bl.length);for(let i=0;i<bl.length;i++)diff[i]=Math.abs(bl[i]-bgModel[i]);
+  for(let i=0;i<bgModel.length;i++)bgModel[i]=bgModel[i]*(1-lr*.1)+bl[i]*(lr*.1);
+  const bin=new Uint8Array(bl.length);for(let i=0;i<diff.length;i++){if(roiMask&&roiMask[i]===0)continue;bin[i]=diff[i]>thr?255:0}
+  const cleaned=morph(bin,width,height,morSz);
 
-  // --- 各検出候補をチェック ---
-  for (let i = 0; i < numPreds; i++) {
-    const offset = i * (NUM_CLASSES + 5);  // 85刻み
+  const cW=CELL_SIZE,cH=CELL_SIZE,gC=Math.ceil(width/cW),gR=Math.ceil(height/cH);
+  const grid=new Uint8Array(gC*gR),mT=cW*cH*.15;
+  for(let gy=0;gy<gR;gy++)for(let gx=0;gx<gC;gx++){let c=0;const px0=gx*cW,py0=gy*cH;for(let py=py0;py<Math.min(py0+cH,height);py++)for(let px=px0;px<Math.min(px0+cW,width);px++)if(cleaned[py*width+px])c++;if(c>=mT)grid[gy*gC+gx]=1}
 
-    // バウンディングボックス (416x416空間での座標)
-    const cx = outputData[offset];      // 中心X
-    const cy = outputData[offset + 1];  // 中心Y
-    const w  = outputData[offset + 2];  // 幅
-    const h  = outputData[offset + 3];  // 高さ
-    const objectness = outputData[offset + 4]; // この領域に物体がある確率
+  // Connected components
+  const labels=new Int32Array(gC*gR);let lId=0;const bbs=[];
+  for(let gy=0;gy<gR;gy++)for(let gx=0;gx<gC;gx++){const idx=gy*gC+gx;if(grid[idx]===1&&labels[idx]===0){lId++;let mnx=gx,mny=gy,mxx=gx,mxy=gy;const st=[idx];labels[idx]=lId;while(st.length){const ci=st.pop(),cy=(ci/gC)|0,cx=ci%gC;mnx=Math.min(mnx,cx);mxx=Math.max(mxx,cx);mny=Math.min(mny,cy);mxy=Math.max(mxy,cy);for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const nx=cx+dx,ny=cy+dy;if(nx>=0&&nx<gC&&ny>=0&&ny<gR){const ni=ny*gC+nx;if(grid[ni]===1&&labels[ni]===0){labels[ni]=lId;st.push(ni)}}}}bbs.push({mnx,mny,mxx,mxy})}}
 
-    // objectness が低すぎる場合はスキップ（高速化）
-    if (objectness < 0.1) continue;
+  // Init grids
+  if(!persistGrid||persistGridCols!==gC){persistGrid=new Uint8Array(gC*gR);persistGridCols=gC}
+  if(!oscillationMap||oscillationMap.length!==gC*gR)oscillationMap=new Float32Array(gC*gR);
+  if(!hotzoneMap||hotzoneMap.length!==gC*gR)hotzoneMap=new Float32Array(gC*gR);
 
-    // --- 80クラスの中で最もスコアが高いクラスを探す ---
-    let maxClassScore = 0;
-    let maxClassIdx = 0;
-    for (let c = 0; c < NUM_CLASSES; c++) {
-      const classScore = outputData[offset + 5 + c];
-      if (classScore > maxClassScore) {
-        maxClassScore = classScore;
-        maxClassIdx = c;
-      }
+  const mc=new Set(),results=[];
+  for(const bb of bbs){
+    const x=bb.mnx*cW,y=bb.mny*cH,w=(bb.mxx-bb.mnx+1)*cW,h=(bb.mxy-bb.mny+1)*cH,a=w*h;
+    if(a<minA||a>maxA)continue;
+    if(Math.max(w/h,h/w)>maxAsp)continue;
+
+    const ck=bb.mny*gC+bb.mnx;
+    mc.add(ck);
+    persistGrid[ck]=(persistGrid[ck]||0)+1;
+    if(persistGrid[ck]<persReq)continue;
+
+    // --- 高度フィルタ1: 揺らめき除外 ---
+    if(useOscFilter){
+      oscillationMap[ck]=(oscillationMap[ck]||0)+1;
+      // 同じセルで20回以上検知→揺らめきとみなす
+      if(oscillationMap[ck]>20)continue;
     }
 
-    // 最終スコア = objectness × クラススコア
-    const finalScore = objectness * maxClassScore;
-    if (finalScore < threshold) continue;
-
-    // --- ターゲットフィルタ ---
-    if (targetMode === 'bird' && maxClassIdx !== 14) continue;
-    if (targetMode === 'all_animal' && !ANIMALS.includes(maxClassIdx)) continue;
-
-    // --- 座標を元の映像サイズに変換 ---
-    // 416x416空間 → パディング除去 → スケール戻し → 元画像座標
-    const x1 = (cx - w/2 - padX) / scale;
-    const y1 = (cy - h/2 - padY) / scale;
-    const bw = w / scale;
-    const bh = h / scale;
-
-    // 画像範囲内にクリップ
-    const fx = Math.max(0, x1);
-    const fy = Math.max(0, y1);
-    const fw = Math.min(origW - fx, bw);
-    const fh = Math.min(origH - fy, bh);
-
-    if (fw > 0 && fh > 0) {
-      results.push({
-        bbox: [fx, fy, fw, fh],
-        class: COCO_CLASSES[maxClassIdx],
-        score: finalScore,
-        classIdx: maxClassIdx,
-        method: 'ai'
-      });
+    // --- 高度フィルタ2: ゾーン冷却 ---
+    if(useHotzone){
+      hotzoneMap[ck]=(hotzoneMap[ck]||0)+1;
+      // 累積50回以上→ホットゾーン（常にノイズが出る場所）→検知力を減衰
+      if(hotzoneMap[ck]>50&&Math.random()>0.2)continue; // 80%除外
     }
+
+    // --- 高度フィルタ3: 充填率 ---
+    const fillR=calcFillRatio(cleaned,width,[x,y,w,h]);
+    if(fillR<minFillRatio)continue; // 影はスカスカで充填率が低い
+
+    // --- 高度フィルタ4: エッジ密度 ---
+    const edgeD=calcEdgeDensity(gray,width,height,[x,y,w,h]);
+    if(edgeD<minEdgeDensity)continue; // 影はエッジが少ない
+
+    results.push({bbox:[x,y,w,h],class:'motion',score:Math.min(a/maxA,1),method:'motion',area:a,fillRatio:fillR,edgeDensity:edgeD});
   }
 
-  // --- NMS（Non-Maximum Suppression）---
-  // 重複する検出ボックスを除去する処理
-  return nms(results, NMS_THRESH);
-}
-
-/**
- * NMS: 重複するボックスを除去
- * IoU（交差面積/和集合面積）が閾値を超えるペアのうち、
- * スコアが低い方を除去する
- */
-function nms(detections, iouThreshold) {
-  if (detections.length === 0) return [];
-
-  // スコアの降順にソート
-  detections.sort((a, b) => b.score - a.score);
-
-  const kept = [];
-  const suppressed = new Set();
-
-  for (let i = 0; i < detections.length; i++) {
-    if (suppressed.has(i)) continue;
-    kept.push(detections[i]);
-
-    for (let j = i + 1; j < detections.length; j++) {
-      if (suppressed.has(j)) continue;
-      if (computeIoU(detections[i].bbox, detections[j].bbox) > iouThreshold) {
-        suppressed.add(j);  // スコアが低い方を除去
-      }
-    }
-  }
-  return kept;
-}
-
-/** IoU（Intersection over Union）を計算 */
-function computeIoU(a, b) {
-  const ix = Math.max(0, Math.min(a[0]+a[2], b[0]+b[2]) - Math.max(a[0], b[0]));
-  const iy = Math.max(0, Math.min(a[1]+a[3], b[1]+b[3]) - Math.max(a[1], b[1]));
-  const inter = ix * iy;
-  const union = a[2]*a[3] + b[2]*b[3] - inter;
-  return union > 0 ? inter / union : 0;
-}
-
-// ============================================================
-//  統合: detectAI() 関数
-//
-//  以前:  const preds = await model.detect(video);
-//  今回:  前処理 → ONNX推論 → 後処理 の3ステップ
-//
-//  ※ この関数のインターフェース（引数と返り値）は
-//    COCO-SSD版と同じなので、呼び出し元の変更は不要
-// ============================================================
-async function detectAI(source, threshold) {
-  if (!onnxSession) return [];
-
-  const srcW = source.videoWidth || source.width;
-  const srcH = source.videoHeight || source.height;
-  if (srcW === 0 || srcH === 0) return [];
-
-  // ステップ1: 前処理（映像フレーム → テンソル）
-  const { tensor, scale, padX, padY } = preprocessForYOLOX(source);
-
-  // ステップ2: ONNX推論の実行
-  const inputName = onnxSession.inputNames[0];   // 通常 "images"
-  const outputName = onnxSession.outputNames[0];  // 通常 "output"
-  const feeds = { [inputName]: tensor };
-  const results = await onnxSession.run(feeds);
-  const outputData = results[outputName].data;    // Float32Array
-
-  // ステップ3: 後処理（生出力 → 検知結果配列）
-  let detections = postprocessYOLOX(outputData, threshold, scale, padX, padY, srcW, srcH);
-
-  // ROIマスク適用
-  if (roiMask && roiZones.length) {
-    detections = detections.filter(d => {
-      const cx = d.bbox[0] + d.bbox[2]/2;
-      const cy = d.bbox[1] + d.bbox[3]/2;
-      const idx = Math.round(cy) * srcW + Math.round(cx);
-      return idx >= 0 && idx < roiMask.length && roiMask[idx] === 1;
-    });
-  }
-
-  return detections;
-}
-
-// ============================================================
-//  クロップズーム検知（ONNX版）
-//  動体候補を切り出し → 拡大 → AI で確認
-// ============================================================
-async function cropZoomDetect(video, motionResults, threshold) {
-  if (!onnxSession || !motionResults.length) return [];
-  const vw = video.videoWidth, vh = video.videoHeight;
-  const zoomSize = parseInt($('cropZoomSize').value) || 300;
-  const marginPct = (parseInt($('cropMargin').value) || 40) / 100;
-  if (!cropCanvas) { cropCanvas = document.createElement('canvas'); cropCtx = cropCanvas.getContext('2d'); }
-  cropCanvas.width = zoomSize; cropCanvas.height = zoomSize;
-  const results = [];
-
-  for (const mr of motionResults) {
-    const [bx,by,bw,bh] = mr.bbox;
-    const mx = bw * marginPct, my = bh * marginPct;
-    let sx = Math.max(0, bx - mx), sy = Math.max(0, by - my);
-    let sw = Math.min(vw - sx, bw + mx*2), sh = Math.min(vh - sy, bh + my*2);
-    const side = Math.max(sw, sh);
-    sx = Math.max(0, sx - (side-sw)/2); sy = Math.max(0, sy - (side-sh)/2);
-    sw = Math.min(vw - sx, side); sh = Math.min(vh - sy, side);
-
-    cropCtx.clearRect(0,0,zoomSize,zoomSize);
-    cropCtx.drawImage(video, sx, sy, sw, sh, 0, 0, zoomSize, zoomSize);
-
-    // クロップ画像でAI推論
-    const { tensor, scale: cScale, padX: cPadX, padY: cPadY } = preprocessForYOLOX(cropCanvas);
-    const inputName = onnxSession.inputNames[0];
-    const outputName = onnxSession.outputNames[0];
-    const res = await onnxSession.run({ [inputName]: tensor });
-    const preds = postprocessYOLOX(res[outputName].data, threshold, cScale, cPadX, cPadY, zoomSize, zoomSize);
-
-    for (const p of preds) {
-      const scaleX = sw/zoomSize, scaleY = sh/zoomSize;
-      results.push({
-        bbox: [sx + p.bbox[0]*scaleX, sy + p.bbox[1]*scaleY, p.bbox[2]*scaleX, p.bbox[3]*scaleY],
-        class: p.class, score: p.score, method: 'zoom', area: mr.area
-      });
-    }
+  // Decay
+  for(let i=0;i<persistGrid.length;i++){
+    if(!mc.has(i)){persistGrid[i]=0;if(oscillationMap)oscillationMap[i]=Math.max(0,oscillationMap[i]-0.5)}
+    // ゾーン冷却の緩やかな減衰
+    if(hotzoneMap)hotzoneMap[i]*=0.998;
   }
   return results;
 }
 
-// ============================================================
-//  以下は v0.7 とほぼ同じ（動体検知・ROI・UI・ログ等）
-// ============================================================
+// Combined
+async function runDet(src,mode){
+  const thr=$('thresholdSlider').value/100;
+  if(mode==='motion')return detectMotion(src);
+  if(mode==='ai')return await detectAI(src,thr);
+  if(mode==='cropzoom'){const mr=detectMotion(src);if(!mr.length)return[];const zr=await cropZoomDetect(src,mr,thr);const conf=new Set();for(const z of zr)for(let i=0;i<mr.length;i++)if(iou(z.bbox,mr[i].bbox)>0.1)conf.add(i);return[...zr,...mr.filter((_,i)=>!conf.has(i))]}
+  const mr=detectMotion(src),ar=await detectAI(src,thr),r=[...ar];for(const m of mr)if(!ar.some(a=>iou(m.bbox,a.bbox)>.3))r.push(m);return r;
+}
 
-// --- ROI ---
+// Snapshot
+function captureSnapshot(video,results){if(!snapCanvas){snapCanvas=document.createElement('canvas');snapCtx=snapCanvas.getContext('2d')}const w=video.videoWidth,h=video.videoHeight;snapCanvas.width=w;snapCanvas.height=h;snapCtx.drawImage(video,0,0,w,h);results.forEach(d=>{const[x,y,bw,bh]=d.bbox;const isMo=d.method==='motion',isZoom=d.method==='zoom';const c=isZoom?'#06b6d4':isMo?'#f97316':'#ef4444';snapCtx.strokeStyle=c;snapCtx.lineWidth=3;snapCtx.strokeRect(x,y,bw,bh);snapCtx.fillStyle=c+'cc';snapCtx.fillRect(x,y-14,60,14);snapCtx.fillStyle='#fff';snapCtx.font='bold 9px JetBrains Mono';snapCtx.fillText(isZoom?'ZOOM:'+d.class:isMo?'MOTION':d.class.toUpperCase(),x+2,y-3)});return snapCanvas.toDataURL('image/jpeg',0.6)}
+
+// === ROI (same) ===
 function toggleRoiMode(){isRoiMode=!isRoiMode;roiCanvas.style.display=isRoiMode?'block':'none';$('btnRoi').classList.toggle('act',isRoiMode);if(isRoiMode){setStatus('roi-mode','ROI設定中');syncRoiCanvas();drawRoiOvl();if(videoPlayer.readyState>=2&&!videoPlayer.paused)videoPlayer.pause()}else{setStatus('active','READY');buildRoiMask()}}
 function syncRoiCanvas(){roiCanvas.width=videoPlayer.videoWidth||640;roiCanvas.height=videoPlayer.videoHeight||480}
 function m2v(e){const r=roiCanvas.getBoundingClientRect();return{x:(e.clientX-r.left)*(roiCanvas.width/r.width),y:(e.clientY-r.top)*(roiCanvas.height/r.height)}}
@@ -780,57 +541,8 @@ function buildRoiMask(){const W=videoPlayer.videoWidth||640,H=videoPlayer.videoH
 $('roiMode').addEventListener('change',()=>{buildRoiMask();if(isRoiMode)drawRoiOvl()});
 function drawRoiLines(){if(!roiZones.length)return;ctx.save();ctx.setLineDash([6,4]);ctx.lineWidth=1;ctx.globalAlpha=.3;roiZones.forEach((z,i)=>{ctx.strokeStyle=ROI_COLORS[i%ROI_COLORS.length];ctx.strokeRect(z.x,z.y,z.w,z.h)});ctx.restore()}
 
-// --- Motion Detection (same as v0.7) ---
-function initWork(w,h){if(!workCanvas||workCanvas.width!==w||workCanvas.height!==h){workCanvas=document.createElement('canvas');workCanvas.width=w;workCanvas.height=h;workCtx=workCanvas.getContext('2d',{willReadFrequently:true});bgModel=null;persistGrid=null}}
-function capGray(v){const w=v.videoWidth,h=v.videoHeight;initWork(w,h);workCtx.drawImage(v,0,0,w,h);const d=workCtx.getImageData(0,0,w,h).data,g=new Float32Array(w*h);for(let i=0;i<g.length;i++){const j=i*4;g[i]=(d[j]*77+d[j+1]*150+d[j+2]*29)/256}return{gray:g,width:w,height:h}}
-function boxBlur(s,w,h,r){if(r<=0)return s;let d=new Float32Array(s.length);for(let p=0;p<r;p++){const inp=p===0?s:d;for(let y=0;y<h;y++)for(let x=0;x<w;x++){let sum=0,c=0;for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){const nx=x+dx,ny=y+dy;if(nx>=0&&nx<w&&ny>=0&&ny<h){sum+=inp[ny*w+nx];c++}}d[y*w+x]=sum/c}}return d}
-function morph(bin,w,h,sz){if(sz<=0)return bin;let c=bin;for(let p=0;p<sz;p++){const e=new Uint8Array(w*h);for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++)if(c[y*w+x]&&c[(y-1)*w+x]&&c[(y+1)*w+x]&&c[y*w+x-1]&&c[y*w+x+1])e[y*w+x]=255;c=e}for(let p=0;p<sz;p++){const d=new Uint8Array(w*h);for(let y=1;y<h-1;y++)for(let x=1;x<w-1;x++)if(c[y*w+x]||c[(y-1)*w+x]||c[(y+1)*w+x]||c[y*w+x-1]||c[y*w+x+1])d[y*w+x]=255;c=d}return c}
-
-function detectMotion(video){
-  const{gray,width,height}=capGray(video);const sens=parseInt($('motionSensitivity').value),thr=80-sens;
-  const minA=parseInt($('minArea').value)||150,maxA=parseInt($('maxArea').value)||50000;
-  const lr=parseInt($('bgLearnRate').value)/100,blR=parseInt($('blurRadius').value),morSz=parseInt($('morphSize').value);
-  const brRej=parseInt($('brightnessReject').value),maxAsp=parseFloat($('maxAspect').value)||5,persReq=parseInt($('persistFrames').value)||1;
-  const bl=boxBlur(gray,width,height,blR);
-  if(!bgModel||bgModel.length!==bl.length){bgModel=new Float32Array(bl);return[]}
-  let sC=0,sB=0;const step=Math.max(1,(bl.length/10000)|0);for(let i=0;i<bl.length;i+=step){sC+=bl[i];sB+=bgModel[i]}
-  if(brRej>0&&Math.abs(sC-sB)/(bl.length/step)>brRej){for(let i=0;i<bgModel.length;i++)bgModel[i]=bgModel[i]*.5+bl[i]*.5;return[]}
-  const diff=new Float32Array(bl.length);for(let i=0;i<bl.length;i++)diff[i]=Math.abs(bl[i]-bgModel[i]);
-  for(let i=0;i<bgModel.length;i++)bgModel[i]=bgModel[i]*(1-lr*.1)+bl[i]*(lr*.1);
-  const bin=new Uint8Array(bl.length);for(let i=0;i<diff.length;i++){if(roiMask&&roiMask[i]===0)continue;bin[i]=diff[i]>thr?255:0}
-  const cleaned=morph(bin,width,height,morSz);
-  const cW=CELL_SIZE,cH=CELL_SIZE,gC=Math.ceil(width/cW),gR=Math.ceil(height/cH);
-  const grid=new Uint8Array(gC*gR),mT=cW*cH*.15;
-  for(let gy=0;gy<gR;gy++)for(let gx=0;gx<gC;gx++){let c=0;const px0=gx*cW,py0=gy*cH;for(let py=py0;py<Math.min(py0+cH,height);py++)for(let px=px0;px<Math.min(px0+cW,width);px++)if(cleaned[py*width+px])c++;if(c>=mT)grid[gy*gC+gx]=1}
-  const labels=new Int32Array(gC*gR);let lId=0;const bbs=[];
-  for(let gy=0;gy<gR;gy++)for(let gx=0;gx<gC;gx++){const idx=gy*gC+gx;if(grid[idx]===1&&labels[idx]===0){lId++;let mnx=gx,mny=gy,mxx=gx,mxy=gy;const st=[idx];labels[idx]=lId;while(st.length){const ci=st.pop(),cy=(ci/gC)|0,cx=ci%gC;mnx=Math.min(mnx,cx);mxx=Math.max(mxx,cx);mny=Math.min(mny,cy);mxy=Math.max(mxy,cy);for(let dy=-1;dy<=1;dy++)for(let dx=-1;dx<=1;dx++){if(!dx&&!dy)continue;const nx=cx+dx,ny=cy+dy;if(nx>=0&&nx<gC&&ny>=0&&ny<gR){const ni=ny*gC+nx;if(grid[ni]===1&&labels[ni]===0){labels[ni]=lId;st.push(ni)}}}}bbs.push({mnx,mny,mxx,mxy})}}
-  if(!persistGrid||persistGridCols!==gC){persistGrid=new Uint8Array(gC*gR);persistGridCols=gC}
-  const mc=new Set(),results=[];
-  for(const bb of bbs){const x=bb.mnx*cW,y=bb.mny*cH,w=(bb.mxx-bb.mnx+1)*cW,h=(bb.mxy-bb.mny+1)*cH,a=w*h;if(a<minA||a>maxA)continue;if(Math.max(w/h,h/w)>maxAsp)continue;const ck=bb.mny*gC+bb.mnx;mc.add(ck);persistGrid[ck]=(persistGrid[ck]||0)+1;if(persistGrid[ck]>=persReq)results.push({bbox:[x,y,w,h],class:'motion',score:Math.min(a/maxA,1),method:'motion',area:a})}
-  for(let i=0;i<persistGrid.length;i++)if(!mc.has(i))persistGrid[i]=0;
-  return results;
-}
-
-// --- Combined Detection ---
-async function runDet(src,mode){
-  const thr=$('thresholdSlider').value/100;
-  if(mode==='motion')return detectMotion(src);
-  if(mode==='ai')return await detectAI(src,thr);
-  if(mode==='cropzoom'){
-    const motionR=detectMotion(src);if(!motionR.length)return[];
-    const zoomR=await cropZoomDetect(src,motionR,thr);
-    const confirmed=new Set();
-    for(const z of zoomR)for(let i=0;i<motionR.length;i++)if(computeIoU(z.bbox,motionR[i].bbox)>0.1)confirmed.add(i);
-    return[...zoomR,...motionR.filter((_,i)=>!confirmed.has(i))];
-  }
-  const mr=detectMotion(src),ar=await detectAI(src,thr),r=[...ar];
-  for(const m of mr)if(!ar.some(a=>computeIoU(m.bbox,a.bbox)>.3))r.push(m);return r;
-}
-
-function captureSnapshot(video,results){if(!snapCanvas){snapCanvas=document.createElement('canvas');snapCtx=snapCanvas.getContext('2d')}const w=video.videoWidth,h=video.videoHeight;snapCanvas.width=w;snapCanvas.height=h;snapCtx.drawImage(video,0,0,w,h);results.forEach(d=>{const[x,y,bw,bh]=d.bbox;const isMo=d.method==='motion',isZoom=d.method==='zoom';const c=isZoom?'#06b6d4':isMo?'#f97316':'#ef4444';snapCtx.strokeStyle=c;snapCtx.lineWidth=3;snapCtx.strokeRect(x,y,bw,bh);snapCtx.fillStyle=c+'cc';snapCtx.fillRect(x,y-14,60,14);snapCtx.fillStyle='#fff';snapCtx.font='bold 9px JetBrains Mono';snapCtx.fillText(isZoom?'ZOOM:'+d.class:isMo?'MOTION':d.class.toUpperCase(),x+2,y-3)});return snapCanvas.toDataURL('image/jpeg',0.6)}
-
-// --- File ---
-$('fileInput').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;videoPlayer.src=URL.createObjectURL(f);videoPlayer.load();videoPlayer.addEventListener('loadedmetadata',function m(){videoPlayer.removeEventListener('loadedmetadata',m);videoLoaded=true;bgModel=null;persistGrid=null;$('uploadZone').style.display='none';$('overlayInfo').style.display='flex';$('btnRealtime').disabled=false;$('btnScan').disabled=false;$('btnRoi').disabled=false;videoPlayer.currentTime=0;videoPlayer.addEventListener('seeked',function s(){videoPlayer.removeEventListener('seeked',s);setStatus('active','READY')})})});
+// File
+$('fileInput').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;videoPlayer.src=URL.createObjectURL(f);videoPlayer.load();videoPlayer.addEventListener('loadedmetadata',function m(){videoPlayer.removeEventListener('loadedmetadata',m);videoLoaded=true;bgModel=null;persistGrid=null;oscillationMap=null;hotzoneMap=null;$('uploadZone').style.display='none';$('overlayInfo').style.display='flex';$('btnRealtime').disabled=false;$('btnScan').disabled=false;$('btnRoi').disabled=false;videoPlayer.currentTime=0;videoPlayer.addEventListener('seeked',function s(){videoPlayer.removeEventListener('seeked',s);setStatus('active','READY')})})});
 $('thresholdSlider').addEventListener('input',()=>{$('thresholdVal').textContent=($('thresholdSlider').value/100).toFixed(2)});
 $('motionSensitivity').addEventListener('input',()=>{$('motionSensVal').textContent=$('motionSensitivity').value});
 $('bgLearnRate').addEventListener('input',()=>{$('bgLearnVal').textContent=($('bgLearnRate').value/100).toFixed(2)});
@@ -838,186 +550,44 @@ $('blurRadius').addEventListener('input',()=>{$('blurVal').textContent=$('blurRa
 $('morphSize').addEventListener('input',()=>{$('morphVal').textContent=$('morphSize').value});
 $('brightnessReject').addEventListener('input',()=>{$('brightVal').textContent=$('brightnessReject').value});
 $('cropMargin').addEventListener('input',()=>{$('cropMarginVal').textContent=$('cropMargin').value+'%'});
+$('fillRatioMin').addEventListener('input',()=>{$('fillRatioVal').textContent=$('fillRatioMin').value+'%'});
+$('edgeDensityMin').addEventListener('input',()=>{$('edgeDensityVal').textContent=$('edgeDensityMin').value+'%'});
 
-// --- Realtime / FastScan / Stop ---
-function startRealtime(){if(!videoLoaded)return;const mode=$('detectMode').value;if(mode!=='motion'&&!onnxSession){alert('AIモデル未読込');return}if(isRoiMode)toggleRoiMode();stopAll();isDetecting=true;const sp=parseFloat($('speedSelect').value);videoPlayer.playbackRate=sp;videoPlayer.currentTime=0;videoPlayer.play();bgModel=null;persistGrid=null;$('btnRealtime').style.display='none';$('btnScan').style.display='none';$('btnStop').style.display='inline-flex';$('recTag').style.display='inline';$('motionTag').style.display=mode!=='ai'?'inline':'none';$('speedTag').style.display='inline';$('speedTag').textContent=sp+'x';$('progressSection').classList.remove('visible');setStatus('detecting','DETECTING '+sp+'x');lastLogTime=-1;runLoop()}
+// Realtime / Scan
+function startRealtime(){if(!videoLoaded)return;if(isRoiMode)toggleRoiMode();stopAll();isDetecting=true;const sp=parseFloat($('speedSelect').value);videoPlayer.playbackRate=sp;videoPlayer.currentTime=0;videoPlayer.play();bgModel=null;persistGrid=null;oscillationMap=null;hotzoneMap=null;$('btnRealtime').style.display='none';$('btnScan').style.display='none';$('btnStop').style.display='inline-flex';$('recTag').style.display='inline';$('motionTag').style.display=$('detectMode').value!=='ai'?'inline':'none';$('speedTag').style.display='inline';$('speedTag').textContent=sp+'x';$('progressSection').classList.remove('visible');setStatus('detecting','DETECTING '+sp+'x');lastLogTime=-1;runLoop()}
 async function runLoop(){if(!isDetecting)return;if(videoPlayer.ended||videoPlayer.paused){stopAll();return}const t0=performance.now();syncCanvas();const results=await runDet(videoPlayer,$('detectMode').value);drawDet(results);drawRoiLines();const ct=videoPlayer.currentTime;if(results.length>0&&(ct-lastLogTime)>=DEDUP_INTERVAL){lastLogTime=ct;addGroup(ct,results)}const dt=performance.now()-t0;fpsHistory.push(dt);if(fpsHistory.length>20)fpsHistory.shift();if(performance.now()-lastFpsUpdate>500){$('fpsTag').textContent=Math.round(1000/(fpsHistory.reduce((a,b)=>a+b,0)/fpsHistory.length))+' FPS';lastFpsUpdate=performance.now()}$('timeTag').textContent=fmtT(ct);animFrameId=requestAnimationFrame(runLoop)}
-
-async function startFastScan(){if(!videoLoaded)return;const mode=$('detectMode').value;if(mode!=='motion'&&!onnxSession){alert('AIモデル未読込');return}if(isRoiMode)toggleRoiMode();stopAll();isFastScanning=true;bgModel=null;persistGrid=null;$('btnRealtime').style.display='none';$('btnScan').style.display='none';$('btnStop').style.display='inline-flex';$('scanTag').style.display='inline';$('motionTag').style.display=mode!=='ai'?'inline':'none';$('speedTag').style.display='none';$('progressSection').classList.add('visible');$('progressFill').style.width='0%';setStatus('scanning','SCANNING');videoPlayer.pause();const dur=videoPlayer.duration,intv=parseFloat($('intervalInput').value)||3,tot=Math.ceil(dur/intv);scanAbortController={aborted:false};let proc=0;const t0=performance.now();for(let t=0;t<dur;t+=intv){if(scanAbortController.aborted)break;await seekWait(videoPlayer,t);syncCanvas();const r=await runDet(videoPlayer,mode);drawDet(r);drawRoiLines();if(r.length>0)addGroup(t,r);proc++;const pct=(proc/tot)*100;$('progressFill').style.width=pct+'%';$('progressText').textContent=proc+'/'+tot+' ('+pct.toFixed(1)+'%)';$('timeTag').textContent=fmtT(t);const el=(performance.now()-t0)/1000,pf=el/proc;$('progressEta').textContent='残り: '+fmtT((tot-proc)*pf);$('fpsTag').textContent=(1/pf).toFixed(1)+' f/s'}if(!scanAbortController.aborted){setStatus('done','COMPLETE');$('progressText').textContent='完了: '+tot+'F';$('progressEta').textContent='検知: '+groups.length+'グループ';$('progressFill').style.width='100%'}['scanTag','motionTag'].forEach(t=>$(t).style.display='none');$('btnStop').style.display='none';$('btnRealtime').style.display='inline-flex';$('btnScan').style.display='inline-flex';isFastScanning=false}
+async function startFastScan(){if(!videoLoaded)return;if(isRoiMode)toggleRoiMode();stopAll();isFastScanning=true;bgModel=null;persistGrid=null;oscillationMap=null;hotzoneMap=null;$('btnRealtime').style.display='none';$('btnScan').style.display='none';$('btnStop').style.display='inline-flex';$('scanTag').style.display='inline';$('motionTag').style.display=$('detectMode').value!=='ai'?'inline':'none';$('speedTag').style.display='none';$('progressSection').classList.add('visible');$('progressFill').style.width='0%';setStatus('scanning','SCANNING');videoPlayer.pause();const dur=videoPlayer.duration,intv=parseFloat($('intervalInput').value)||3,tot=Math.ceil(dur/intv);scanAbortController={aborted:false};let proc=0;const t0=performance.now();for(let t=0;t<dur;t+=intv){if(scanAbortController.aborted)break;await seekWait(videoPlayer,t);syncCanvas();const r=await runDet(videoPlayer,$('detectMode').value);drawDet(r);drawRoiLines();if(r.length>0)addGroup(t,r);proc++;const pct=(proc/tot)*100;$('progressFill').style.width=pct+'%';$('progressText').textContent=proc+'/'+tot+' ('+pct.toFixed(1)+'%)';$('timeTag').textContent=fmtT(t);const el=(performance.now()-t0)/1000,pf=el/proc;$('progressEta').textContent='残り: '+fmtT((tot-proc)*pf);$('fpsTag').textContent=(1/pf).toFixed(1)+' f/s'}if(!scanAbortController.aborted){setStatus('done','COMPLETE');$('progressText').textContent='完了: '+tot+'F';$('progressEta').textContent='検知: '+groups.length+'G';$('progressFill').style.width='100%'}['scanTag','motionTag'].forEach(t=>$(t).style.display='none');$('btnStop').style.display='none';$('btnRealtime').style.display='inline-flex';$('btnScan').style.display='inline-flex';isFastScanning=false}
 function seekWait(v,t){return new Promise(r=>{v.currentTime=t;function s(){v.removeEventListener('seeked',s);requestAnimationFrame(()=>requestAnimationFrame(r))}v.addEventListener('seeked',s)})}
 function stopAll(){isDetecting=false;isFastScanning=false;if(animFrameId)cancelAnimationFrame(animFrameId);if(scanAbortController)scanAbortController.aborted=true;videoPlayer.pause();videoPlayer.playbackRate=1;$('btnRealtime').style.display='inline-flex';$('btnScan').style.display='inline-flex';$('btnStop').style.display='none';['recTag','scanTag','motionTag','speedTag'].forEach(t=>$(t).style.display='none');ctx.clearRect(0,0,overlayCanvas.width,overlayCanvas.height);if(videoLoaded)setStatus('active','STOPPED')}
 function syncCanvas(){if(overlayCanvas.width!==videoPlayer.videoWidth||overlayCanvas.height!==videoPlayer.videoHeight){overlayCanvas.width=videoPlayer.videoWidth||640;overlayCanvas.height=videoPlayer.videoHeight||480}}
 function drawDet(results){ctx.clearRect(0,0,overlayCanvas.width,overlayCanvas.height);results.forEach(d=>{const[x,y,w,h]=d.bbox;const isMo=d.method==='motion',isZoom=d.method==='zoom';const c=isZoom?'#06b6d4':isMo?'#f97316':'#ef4444';const a=isZoom?'rgba(6,182,212,.8)':isMo?'rgba(249,115,22,.6)':'rgba(239,68,68,.8)';ctx.strokeStyle=a;ctx.lineWidth=isZoom?3:isMo?1:2;ctx.strokeRect(x,y,w,h);if(!isMo||isZoom){const cl=Math.min(w,h)*.2;ctx.strokeStyle=c;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x,y+cl);ctx.lineTo(x,y);ctx.lineTo(x+cl,y);ctx.stroke();ctx.beginPath();ctx.moveTo(x+w-cl,y);ctx.lineTo(x+w,y);ctx.lineTo(x+w,y+cl);ctx.stroke();ctx.beginPath();ctx.moveTo(x,y+h-cl);ctx.lineTo(x,y+h);ctx.lineTo(x+cl,y+h);ctx.stroke();ctx.beginPath();ctx.moveTo(x+w-cl,y+h);ctx.lineTo(x+w,y+h);ctx.lineTo(x+w,y+h-cl);ctx.stroke()}let lbl=isZoom?'🔍'+d.class.toUpperCase()+' '+(d.score*100).toFixed(0)+'%':isMo?'':d.class.toUpperCase()+' '+(d.score*100).toFixed(0)+'%';if(lbl){ctx.font='bold 10px JetBrains Mono,monospace';const tw=ctx.measureText(lbl).width;ctx.fillStyle=a;ctx.fillRect(x,y-16,tw+8,16);ctx.fillStyle='#fff';ctx.fillText(lbl,x+4,y-4)}})}
 
-// --- Grouped Log ---
-function addGroup(time,results){const id=++groupId;const thumb=captureSnapshot(videoPlayer,results);const items=results.map(r=>({class:r.class,score:r.score,method:r.method,area:r.area||0,feedback:null}));groups.push({id,time,items,feedback:null,thumbDataUrl:thumb});$('logEmpty').style.display='none';updateStats();renderGrp(groups[groups.length-1],true)}
-function renderGrp(g,isNew){const el=document.createElement('div');el.className='grp'+(isNew?' hl':'');el.id='grp-'+g.id;const methods=[...new Set(g.items.map(i=>i.method))];const mTags=methods.map(m=>'<span class="lm '+(m==='zoom'?'zoom':m==='motion'?'motion':'ai')+'">'+(m==='zoom'?'ZOOM':m==='motion'?'MOTION':'AI')+'</span>').join('');const hasZoom=methods.includes('zoom');
-el.innerHTML=`<div class="grp-header" onclick="toggleExpand(${g.id})"><div class="grp-thumb" onclick="event.stopPropagation();seekTo(${g.time})"><canvas id="thumb-${g.id}" width="160" height="90"></canvas><div class="grp-count">${g.items.length}</div>${hasZoom?'<div class="grp-zoom-badge">🔍 ZOOM</div>':''}</div><div class="grp-info"><div class="grp-time" onclick="event.stopPropagation();seekTo(${g.time})">${fmtT(g.time)}</div><div class="grp-methods">${mTags}</div><div class="grp-summary">${g.items.map(i=>i.class.toUpperCase()).join(', ')}</div></div><div class="grp-actions" onclick="event.stopPropagation()"><button class="grp-fb${g.feedback==='correct'?' correct':''}" onclick="setGrpFB(${g.id},'correct',this)">○</button><button class="grp-fb${g.feedback==='incorrect'?' incorrect':''}" onclick="setGrpFB(${g.id},'incorrect',this)">✕</button></div></div><div class="grp-detail" id="detail-${g.id}">${g.items.map((it,idx)=>`<div class="grp-det-item"><span class="lm ${it.method==='zoom'?'zoom':it.method==='motion'?'motion':'ai'}" style="font-size:7px">${it.method==='zoom'?'Z':it.method==='motion'?'M':'AI'}</span><span class="gdi-class">${it.class.toUpperCase()}</span><span class="gdi-score">${it.method==='motion'?it.area.toLocaleString()+'px²':(it.score*100).toFixed(1)+'%'}</span><div class="gdi-fb"><button class="fb-sm${it.feedback==='correct'?' correct':''}" onclick="setItemFB(${g.id},${idx},'correct',this)">○</button><button class="fb-sm${it.feedback==='incorrect'?' incorrect':''}" onclick="setItemFB(${g.id},${idx},'incorrect',this)">✕</button></div></div>`).join('')}</div>`;
-$('logContainer').prepend(el);const img=new Image();img.onload=()=>{const c=$('thumb-'+g.id);if(c){const cx=c.getContext('2d');c.width=160;c.height=90;cx.drawImage(img,0,0,160,90)}};img.src=g.thumbDataUrl;if(isNew)setTimeout(()=>el.classList.remove('hl'),2000)}
-function toggleExpand(gid){const el=$('grp-'+gid);if(el)el.classList.toggle('expanded')}
-function setGrpFB(gid,type,btn){const g=groups.find(g=>g.id===gid);if(!g)return;g.feedback=type;g.items.forEach(it=>it.feedback=type);const par=btn.parentElement;par.querySelectorAll('.grp-fb').forEach(b=>b.className='grp-fb');btn.classList.add(type);const det=$('detail-'+gid);if(det){det.querySelectorAll('.fb-sm').forEach(b=>b.className='fb-sm');det.querySelectorAll('.gdi-fb').forEach(fb=>{fb.querySelector('.fb-sm:nth-child('+(type==='correct'?'1':'2')+')').classList.add(type)})}updateStats()}
+// Grouped log
+function addGroup(time,results){const id=++groupId;const thumb=captureSnapshot(videoPlayer,results);const items=results.map(r=>({class:r.class,score:r.score,method:r.method,area:r.area||0,feedback:null,fillRatio:r.fillRatio,edgeDensity:r.edgeDensity}));groups.push({id,time,items,feedback:null,thumbDataUrl:thumb});$('logEmpty').style.display='none';updateStats();renderGrp(groups[groups.length-1],true)}
+function renderGrp(g,isNew){const el=document.createElement('div');el.className='grp'+(isNew?' hl':'');el.id='grp-'+g.id;const methods=[...new Set(g.items.map(i=>i.method))];const mTags=methods.map(m=>'<span class="lm '+(m==='zoom'?'zoom':m==='motion'?'motion':'ai')+'">'+(m==='zoom'?'ZOOM':m==='motion'?'MOT':'AI')+'</span>').join('');
+el.innerHTML=`<div class="grp-header" onclick="toggleExpand(${g.id})"><div class="grp-thumb" onclick="event.stopPropagation();seekTo(${g.time})"><canvas id="thumb-${g.id}" width="160" height="90"></canvas><div class="grp-count">${g.items.length}</div></div><div class="grp-info"><div class="grp-time" onclick="event.stopPropagation();seekTo(${g.time})">${fmtT(g.time)}</div><div class="grp-methods">${mTags}</div><div class="grp-summary">${g.items.map(i=>i.class.toUpperCase()).join(', ')}</div></div><div class="grp-actions" onclick="event.stopPropagation()"><button class="grp-fb${g.feedback==='correct'?' correct':''}" onclick="setGrpFB(${g.id},'correct',this)">○</button><button class="grp-fb${g.feedback==='incorrect'?' incorrect':''}" onclick="setGrpFB(${g.id},'incorrect',this)">✕</button></div></div><div class="grp-detail" id="detail-${g.id}">${g.items.map((it,idx)=>`<div class="grp-det-item"><span class="lm ${it.method==='zoom'?'zoom':it.method==='motion'?'motion':'ai'}" style="font-size:7px">${it.method==='zoom'?'Z':it.method==='motion'?'M':'AI'}</span><span class="gdi-class">${it.class.toUpperCase()}</span><span class="gdi-score">${it.method==='motion'?it.area.toLocaleString()+'px²':(it.score*100).toFixed(1)+'%'}</span><div class="gdi-fb"><button class="fb-sm${it.feedback==='correct'?' correct':''}" onclick="setItemFB(${g.id},${idx},'correct',this)">○</button><button class="fb-sm${it.feedback==='incorrect'?' incorrect':''}" onclick="setItemFB(${g.id},${idx},'incorrect',this)">✕</button></div></div>`).join('')}</div>`;
+$('logContainer').prepend(el);const img=new Image();img.onload=()=>{const c=$('thumb-'+g.id);if(c){c.getContext('2d').drawImage(img,0,0,160,90)}};img.src=g.thumbDataUrl;if(isNew)setTimeout(()=>el.classList.remove('hl'),2000)}
+function toggleExpand(gid){$('grp-'+gid)?.classList.toggle('expanded')}
+function setGrpFB(gid,type,btn){const g=groups.find(g=>g.id===gid);if(!g)return;g.feedback=type;g.items.forEach(it=>it.feedback=type);btn.parentElement.querySelectorAll('.grp-fb').forEach(b=>b.className='grp-fb');btn.classList.add(type);updateStats()}
 function setItemFB(gid,idx,type,btn){const g=groups.find(g=>g.id===gid);if(!g)return;g.items[idx].feedback=type;btn.parentElement.querySelectorAll('.fb-sm').forEach(b=>b.className='fb-sm');btn.classList.add(type);g.feedback=null;$('grp-'+gid)?.querySelectorAll('.grp-actions .grp-fb').forEach(b=>b.className='grp-fb');updateStats()}
-function updateStats(){const ti=groups.reduce((s,g)=>s+g.items.length,0);$('statGroups').textContent=groups.length;$('statItems').textContent=ti;$('statCorrect').textContent=groups.reduce((s,g)=>s+g.items.filter(i=>i.feedback==='correct').length,0);$('statIncorrect').textContent=groups.reduce((s,g)=>s+g.items.filter(i=>i.feedback==='incorrect').length,0);$('detectionCount').textContent=groups.length+' グループ';$('btnReview').disabled=groups.length===0}
+function updateStats(){const ti=groups.reduce((s,g)=>s+g.items.length,0);$('statGroups').textContent=groups.length;$('statItems').textContent=ti;$('statCorrect').textContent=groups.reduce((s,g)=>s+g.items.filter(i=>i.feedback==='correct').length,0);$('statIncorrect').textContent=groups.reduce((s,g)=>s+g.items.filter(i=>i.feedback==='incorrect').length,0);$('detectionCount').textContent=groups.length+'G';$('btnReview').disabled=groups.length===0}
 function clearLog(){if(!groups.length||!confirm('クリアしますか？'))return;groups=[];groupId=0;lastLogTime=-1;$('logContainer').innerHTML='';$('logContainer').appendChild($('logEmpty'));$('logEmpty').style.display='flex';updateStats()}
-function exportCSV(){if(!groups.length){alert('データなし');return}let csv='group_id,time_sec,time_formatted,item_index,class,score,method,area_px,feedback\n';for(const g of groups)for(let i=0;i<g.items.length;i++){const it=g.items[i];csv+=g.id+','+g.time.toFixed(2)+','+fmtT(g.time)+','+i+','+it.class+','+it.score.toFixed(4)+','+it.method+','+it.area+','+(it.feedback||'')+'\n'}const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download='bird_det_'+new Date().toISOString().slice(0,19).replace(/:/g,'-')+'.csv';a.click()}
+function exportCSV(){if(!groups.length){alert('データなし');return}let csv='group_id,time_sec,time_formatted,item_index,class,score,method,area_px,fill_ratio,edge_density,feedback\n';for(const g of groups)for(let i=0;i<g.items.length;i++){const it=g.items[i];csv+=g.id+','+g.time.toFixed(2)+','+fmtT(g.time)+','+i+','+it.class+','+it.score.toFixed(4)+','+it.method+','+it.area+','+(it.fillRatio||0).toFixed(3)+','+(it.edgeDensity||0).toFixed(3)+','+(it.feedback||'')+'\n'}const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download='bird_det_'+new Date().toISOString().slice(0,19).replace(/:/g,'-')+'.csv';a.click()}
 function seekTo(t){videoPlayer.currentTime=t;videoPlayer.pause()}
 function fmtT(s){return[Math.floor(s/3600),Math.floor((s%3600)/60),Math.floor(s%60)].map(v=>String(v).padStart(2,'0')).join(':')}
 function setStatus(type,text){$('statusBadge').className='sb '+type;$('statusBadge').textContent=text}
 
-// ============================================================
-//  起動
-// ============================================================
-// ============================================================
-//  レビューモード
-//  大きなプレビューで1件ずつ確認。キーボード操作対応。
-// ============================================================
-let rvIndex = 0;
-let rvOpen = false;
-
-function openReview() {
-  if (!groups.length) return;
-  rvOpen = true;
-  rvIndex = 0;
-  // 未判定のものから開始
-  const firstUnmarked = groups.findIndex(g => g.feedback === null);
-  if (firstUnmarked >= 0) rvIndex = firstUnmarked;
-  $('reviewOverlay').classList.add('open');
-  $('rvDone').style.display = 'none';
-  $('rvBody').style.display = 'flex';
-  rvRender();
-}
-
-function closeReview() {
-  rvOpen = false;
-  $('reviewOverlay').classList.remove('open');
-  // ログリスト側のUIを更新
-  refreshLogList();
-}
-
-function rvGoToIndex(idx) {
-  rvIndex = idx;
-  $('rvDone').style.display = 'none';
-  $('rvBody').style.display = 'flex';
-  rvRender();
-}
-
-function rvRender() {
-  if (rvIndex < 0) rvIndex = 0;
-  if (rvIndex >= groups.length) { rvShowDone(); return; }
-
-  const g = groups[rvIndex];
-  // Progress
-  const reviewed = groups.filter(g => g.feedback !== null).length;
-  $('rvProgressFill').style.width = (reviewed / groups.length * 100) + '%';
-  $('rvProgressText').textContent = `${rvIndex + 1} / ${groups.length}（判定済: ${reviewed}）`;
-
-  // Nav buttons
-  $('rvPrev').disabled = rvIndex === 0;
-  $('rvNext').disabled = rvIndex >= groups.length - 1;
-
-  // Time & counts
-  $('rvTime').textContent = fmtT(g.time);
-  $('rvDetCount').textContent = g.items.length + ' 件検知';
-
-  // Status badge
-  const badge = $('rvStatusBadge');
-  badge.className = 'rv-status-badge ' + (g.feedback || 'unmarked');
-  badge.textContent = g.feedback === 'correct' ? '正検知 ○' : g.feedback === 'incorrect' ? '誤検知 ✕' : '未判定';
-
-  // Classes and methods
-  $('rvClasses').textContent = g.items.map(i => i.class.toUpperCase()).join(', ');
-  const methods = [...new Set(g.items.map(i => i.method))];
-  $('rvMethods').innerHTML = methods.map(m =>
-    '<span class="lm ' + (m === 'zoom' ? 'zoom' : m === 'motion' ? 'motion' : 'ai') + '">' +
-    (m === 'zoom' ? 'ZOOM' : m === 'motion' ? 'MOTION' : 'AI') + '</span>'
-  ).join('');
-
-  // Action button highlights
-  $('rvBtnCorrect').classList.toggle('active', g.feedback === 'correct');
-  $('rvBtnIncorrect').classList.toggle('active', g.feedback === 'incorrect');
-
-  // Draw large preview
-  const canvas = $('rvCanvas');
-  const img = new Image();
-  img.onload = () => {
-    canvas.width = img.naturalWidth;
-    canvas.height = img.naturalHeight;
-    const cx = canvas.getContext('2d');
-    cx.drawImage(img, 0, 0);
-  };
-  img.src = g.thumbDataUrl;
-
-  // Also seek video to this time
-  videoPlayer.currentTime = g.time;
-}
-
-function rvMark(type) {
-  if (rvIndex >= groups.length) return;
-  const g = groups[rvIndex];
-  g.feedback = type;
-  g.items.forEach(it => it.feedback = type);
-  updateStats();
-  rvRender();
-  // Auto-advance after short delay
-  setTimeout(() => rvNavigate(1), 250);
-}
-
-function rvNavigate(dir) {
-  rvIndex += dir;
-  if (rvIndex < 0) rvIndex = 0;
-  if (rvIndex >= groups.length) { rvShowDone(); return; }
-  rvRender();
-}
-
-function rvShowDone() {
-  $('rvBody').style.display = 'none';
-  $('rvDone').style.display = 'block';
-  const total = groups.length;
-  const correct = groups.filter(g => g.feedback === 'correct').length;
-  const incorrect = groups.filter(g => g.feedback === 'incorrect').length;
-  const skipped = total - correct - incorrect;
-  $('rvDoneTotal').textContent = total;
-  $('rvDoneCorrect').textContent = correct;
-  $('rvDoneIncorrect').textContent = incorrect;
-  $('rvDoneSkipped').textContent = skipped;
-  $('rvProgressFill').style.width = '100%';
-  $('rvProgressText').textContent = `完了: ${total} グループ`;
-}
-
-// Sync log list card UI after review
-function refreshLogList() {
-  for (const g of groups) {
-    const el = $('grp-' + g.id);
-    if (!el) continue;
-    const btns = el.querySelectorAll('.grp-actions .grp-fb');
-    btns.forEach(b => b.className = 'grp-fb');
-    if (g.feedback === 'correct') btns[0]?.classList.add('correct');
-    if (g.feedback === 'incorrect') btns[1]?.classList.add('incorrect');
-    const det = $('detail-' + g.id);
-    if (det) {
-      det.querySelectorAll('.fb-sm').forEach(b => b.className = 'fb-sm');
-      if (g.feedback) {
-        det.querySelectorAll('.gdi-fb').forEach(fb => {
-          fb.querySelector('.fb-sm:nth-child(' + (g.feedback === 'correct' ? '1' : '2') + ')')?.classList.add(g.feedback);
-        });
-      }
-    }
-  }
-  updateStats();
-}
-
-// Keyboard shortcuts for review mode
-document.addEventListener('keydown', e => {
-  if (!rvOpen) return;
-  switch(e.key) {
-    case 'ArrowLeft':  e.preventDefault(); rvNavigate(-1); break;
-    case 'ArrowRight': e.preventDefault(); rvNavigate(1); break;
-    case 'o': case 'O': e.preventDefault(); rvMark('correct'); break;
-    case 'x': case 'X': e.preventDefault(); rvMark('incorrect'); break;
-    case ' ':          e.preventDefault(); rvNavigate(1); break;
-    case 'Escape':     e.preventDefault(); closeReview(); break;
-  }
-});
+// Review mode
+let rvIndex=0,rvOpen=false;
+function openReview(){if(!groups.length)return;rvOpen=true;rvIndex=groups.findIndex(g=>g.feedback===null);if(rvIndex<0)rvIndex=0;$('reviewOverlay').classList.add('open');$('rvDone').style.display='none';$('rvBody').style.display='flex';rvRender()}
+function closeReview(){rvOpen=false;$('reviewOverlay').classList.remove('open');refreshLogList()}
+function rvGoTo(i){rvIndex=i;$('rvDone').style.display='none';$('rvBody').style.display='flex';rvRender()}
+function rvRender(){if(rvIndex<0)rvIndex=0;if(rvIndex>=groups.length){rvShowDone();return}const g=groups[rvIndex];const rev=groups.filter(g=>g.feedback!==null).length;$('rvProgressFill').style.width=(rev/groups.length*100)+'%';$('rvProgressText').textContent=`${rvIndex+1}/${groups.length}（済:${rev}）`;$('rvPrev').disabled=rvIndex===0;$('rvNext').disabled=rvIndex>=groups.length-1;$('rvTime').textContent=fmtT(g.time);$('rvDetCount').textContent=g.items.length+'件';const b=$('rvBadge');b.className='rv-status-badge '+(g.feedback||'unmarked');b.textContent=g.feedback==='correct'?'正検知 ○':g.feedback==='incorrect'?'誤検知 ✕':'未判定';$('rvClasses').textContent=g.items.map(i=>i.class.toUpperCase()).join(', ');$('rvBtnO').classList.toggle('active',g.feedback==='correct');$('rvBtnX').classList.toggle('active',g.feedback==='incorrect');const cv=$('rvCanvas');const img=new Image();img.onload=()=>{cv.width=img.naturalWidth;cv.height=img.naturalHeight;cv.getContext('2d').drawImage(img,0,0)};img.src=g.thumbDataUrl;videoPlayer.currentTime=g.time}
+function rvMark(type){if(rvIndex>=groups.length)return;const g=groups[rvIndex];g.feedback=type;g.items.forEach(it=>it.feedback=type);updateStats();rvRender();setTimeout(()=>rvNav(1),250)}
+function rvNav(dir){rvIndex+=dir;if(rvIndex<0)rvIndex=0;if(rvIndex>=groups.length){rvShowDone();return}rvRender()}
+function rvShowDone(){$('rvBody').style.display='none';$('rvDone').style.display='block';const c=groups.filter(g=>g.feedback==='correct').length,ic=groups.filter(g=>g.feedback==='incorrect').length;$('rvDT').textContent=groups.length;$('rvDC').textContent=c;$('rvDI').textContent=ic;$('rvProgressFill').style.width='100%'}
+function refreshLogList(){for(const g of groups){const el=$('grp-'+g.id);if(!el)continue;const btns=el.querySelectorAll('.grp-actions .grp-fb');btns.forEach(b=>b.className='grp-fb');if(g.feedback==='correct')btns[0]?.classList.add('correct');if(g.feedback==='incorrect')btns[1]?.classList.add('incorrect')}updateStats()}
+document.addEventListener('keydown',e=>{if(!rvOpen)return;switch(e.key){case'ArrowLeft':e.preventDefault();rvNav(-1);break;case'ArrowRight':e.preventDefault();rvNav(1);break;case'o':case'O':e.preventDefault();rvMark('correct');break;case'x':case'X':e.preventDefault();rvMark('incorrect');break;case' ':e.preventDefault();rvNav(1);break;case'Escape':e.preventDefault();closeReview();break}});
 
 loadModel();
 </script>
