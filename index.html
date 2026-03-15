@@ -65,6 +65,33 @@ body{font-family:var(--sans);background:var(--bg0);color:var(--t1);min-height:10
 .sc h4{font-family:var(--mono);font-size:9px;font-weight:600;margin-bottom:5px;color:var(--t2);display:flex;align-items:center;gap:4px}
 .tg{font-size:8px;padding:1px 4px;border-radius:2px;font-weight:500}
 .tg.mt{background:rgba(249,115,22,.2);color:var(--orange)}.tg.at{background:rgba(59,130,246,.2);color:var(--blue)}.tg.rt{background:rgba(34,197,94,.2);color:var(--green)}.tg.ft{background:rgba(168,85,247,.2);color:var(--purple)}.tg.zt{background:rgba(6,182,212,.2);color:var(--cyan)}.tg.nt{background:rgba(239,68,68,.15);color:var(--red)}
+
+/* Filter description helpers */
+.fdesc{font-size:9px;color:var(--t3);line-height:1.5;padding:4px 0 6px;border-bottom:1px solid rgba(255,255,255,.04);margin-bottom:5px}
+.fdesc b{color:var(--t2)}
+.frow{display:flex;align-items:flex-start;gap:6px;margin-bottom:6px;padding:5px 6px;background:var(--bg3);border-radius:5px;border:1px solid transparent;transition:border-color .2s}
+.frow:hover{border-color:var(--bd)}
+.frow:last-child{margin-bottom:0}
+.frow-icon{width:22px;height:22px;border-radius:5px;display:flex;align-items:center;justify-content:center;font-size:11px;flex-shrink:0;margin-top:1px}
+.frow-icon.purple{background:rgba(168,85,247,.15);color:var(--purple)}
+.frow-icon.orange{background:rgba(249,115,22,.15);color:var(--orange)}
+.frow-icon.cyan{background:rgba(6,182,212,.15);color:var(--cyan)}
+.frow-icon.red{background:rgba(239,68,68,.12);color:var(--red)}
+.frow-icon.green{background:rgba(34,197,94,.12);color:var(--green)}
+.frow-icon.blue{background:rgba(59,130,246,.12);color:var(--blue)}
+.frow-body{flex:1;min-width:0}
+.frow-title{font-family:var(--mono);font-size:10px;font-weight:500;color:var(--t1);margin-bottom:2px;display:flex;align-items:center;gap:4px}
+.frow-hint{font-size:8px;color:var(--t3);line-height:1.4;margin-bottom:4px}
+.frow-ctrl{display:flex;align-items:center;gap:5px}
+.frow-ctrl input[type="range"]{flex:1;accent-color:var(--blue)}
+.frow-ctrl input[type="number"]{width:48px;font-family:var(--mono);font-size:10px;background:var(--bg0);color:var(--t1);border:1px solid var(--bd);border-radius:3px;padding:2px 4px;outline:none}
+.frow-ctrl input[type="checkbox"]{accent-color:var(--blue);margin:0}
+.frow-ctrl .sv{color:var(--cyan);min-width:28px;text-align:right;font-family:var(--mono);font-size:9px}
+.frow-ctrl span{font-family:var(--mono);font-size:9px;color:var(--t3)}
+.fstat{font-family:var(--mono);font-size:9px;color:var(--purple);text-align:right;margin-top:1px}
+.filter-stats-bar{display:flex;gap:6px;flex-wrap:wrap;margin-top:6px;padding:5px 6px;background:var(--bg3);border-radius:5px}
+.fstat-item{font-family:var(--mono);font-size:9px;color:var(--t3);display:flex;align-items:center;gap:3px}
+.fstat-item .fstat-val{color:var(--purple);font-weight:500;min-width:16px;text-align:right}
 .srow{display:flex;align-items:center;gap:5px;margin-bottom:3px;font-family:var(--mono);font-size:10px;color:var(--t2)}
 .srow:last-child{margin-bottom:0}.srow label{min-width:52px;white-space:nowrap;font-size:9px}
 .srow input[type="range"]{flex:1;accent-color:var(--blue)}
@@ -161,6 +188,42 @@ body{font-family:var(--sans);background:var(--bg0);color:var(--t1);min-height:10
 .rv-done .rv-done-stat{text-align:center}
 .rv-done .rv-done-stat .num{font-family:var(--mono);font-size:24px;font-weight:700}
 .rv-done .rv-done-stat .label{font-family:var(--mono);font-size:9px;color:var(--t3);text-transform:uppercase}
+/* === TIMELINE === */
+.tl-wrap{position:relative;height:36px;background:var(--bg3);border-radius:6px;border:1px solid var(--bd);cursor:pointer;overflow:hidden;flex-shrink:0}
+.tl-canvas{width:100%;height:100%;display:block}
+.tl-playhead{position:absolute;top:0;bottom:0;width:2px;background:var(--cyan);pointer-events:none;transition:left .2s;z-index:2}
+.tl-label{position:absolute;bottom:1px;font-family:var(--mono);font-size:8px;pointer-events:none;z-index:3}
+.tl-label.start{left:4px;color:var(--t3)}.tl-label.end{right:4px;color:var(--t3)}
+.tl-tooltip{position:absolute;top:-28px;transform:translateX(-50%);background:var(--bg0);border:1px solid var(--bd);padding:2px 8px;border-radius:4px;font-family:var(--mono);font-size:9px;color:var(--cyan);white-space:nowrap;pointer-events:none;display:none;z-index:5}
+.tl-wrap:hover .tl-tooltip{display:block}
+.tl-legend{display:flex;gap:10px;justify-content:center;font-family:var(--mono);font-size:8px;color:var(--t3);margin-top:2px}
+.tl-legend span{display:flex;align-items:center;gap:3px}
+.tl-legend .tl-dot{width:8px;height:8px;border-radius:2px}
+
+/* === TUNING MODE === */
+.tune-panel{display:none;padding:8px;background:var(--bg2);border:1px solid var(--bd);border-radius:7px}
+.tune-panel.open{display:block}
+.tune-header{display:flex;align-items:center;justify-content:space-between;margin-bottom:6px}
+.tune-header h4{font-family:var(--mono);font-size:10px;font-weight:600;color:var(--amber);display:flex;align-items:center;gap:5px}
+.tune-frame-info{font-family:var(--mono);font-size:9px;color:var(--t3)}
+.tune-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:4px;margin-bottom:6px}
+.tune-stat{padding:6px 8px;background:var(--bg3);border-radius:5px;text-align:center}
+.tune-stat .num{font-family:var(--mono);font-size:16px;font-weight:700}
+.tune-stat .num.orange{color:var(--orange)}.tune-stat .num.green{color:var(--green)}.tune-stat .num.red{color:var(--red)}.tune-stat .num.purple{color:var(--purple)}.tune-stat .num.cyan{color:var(--cyan)}
+.tune-stat .lbl{font-family:var(--mono);font-size:7px;color:var(--t3);text-transform:uppercase;margin-top:2px}
+.tune-breakdown{display:flex;gap:3px;flex-wrap:wrap}
+.tune-tag{font-family:var(--mono);font-size:8px;padding:2px 6px;border-radius:3px;display:flex;align-items:center;gap:3px}
+.tune-tag .ct{font-weight:600}
+.tune-tag.osc{background:rgba(239,68,68,.1);color:var(--red)}
+.tune-tag.fill{background:rgba(34,197,94,.1);color:var(--green)}
+.tune-tag.edge{background:rgba(6,182,212,.1);color:var(--cyan)}
+.tune-tag.hot{background:rgba(59,130,246,.1);color:var(--blue)}
+.tune-tag.asp{background:rgba(168,85,247,.1);color:var(--purple)}
+.tune-tag.sz{background:rgba(249,115,22,.1);color:var(--orange)}
+.tune-bar{height:6px;background:var(--bg3);border-radius:3px;overflow:hidden;margin:6px 0 2px}
+.tune-bar-inner{display:flex;height:100%}
+.tune-bar-seg{height:100%;transition:width .3s}
+
 @media(max-width:960px){.main{grid-template-columns:1fr;grid-template-rows:1fr 1fr}.rp{border-left:none;border-top:1px solid var(--bd)}}
 </style>
 </head>
@@ -174,6 +237,34 @@ body{font-family:var(--sans);background:var(--bg0);color:var(--t1);min-height:10
     <div class="uz" id="uploadZone"><div class="uz-icon">📁</div><h3>動画ファイルをアップロード</h3><p>MP4, WebM, MOV</p><button class="ubtn" onclick="$('fileInput').click()">ファイル選択</button></div>
   </div>
   <div class="ps" id="progressSection"><div class="pbw"><div class="pbf" id="progressFill"></div></div><div class="pi"><span id="progressText">0%</span><span id="progressEta"></span></div></div>
+  <!-- Timeline -->
+  <div class="tl-wrap" id="tlWrap" style="display:none" onclick="tlClick(event)" onmousemove="tlHover(event)" onmouseleave="$('tlTooltip').style.display='none'">
+    <canvas id="tlCanvas" height="36"></canvas>
+    <div class="tl-playhead" id="tlPlayhead" style="left:0"></div>
+    <span class="tl-label start" id="tlStart">00:00:00</span>
+    <span class="tl-label end" id="tlEnd">--:--:--</span>
+    <div class="tl-tooltip" id="tlTooltip"></div>
+  </div>
+  <div class="tl-legend" id="tlLegend" style="display:none">
+    <span><span class="tl-dot" style="background:var(--orange)"></span> 検知あり</span>
+    <span><span class="tl-dot" style="background:var(--green)"></span> 正検知</span>
+    <span><span class="tl-dot" style="background:var(--red)"></span> 誤検知</span>
+    <span><span class="tl-dot" style="background:var(--t3)"></span> 未判定</span>
+  </div>
+  <!-- Tuning panel -->
+  <div class="tune-panel" id="tunePanel">
+    <div class="tune-header">
+      <h4>🔧 チューニングモード — 現在のフレーム分析</h4>
+      <span class="tune-frame-info" id="tuneFrameInfo">--:--:--</span>
+    </div>
+    <div class="tune-grid">
+      <div class="tune-stat"><div class="num orange" id="tuneCand">0</div><div class="lbl">動体候補</div></div>
+      <div class="tune-stat"><div class="num green" id="tunePass">0</div><div class="lbl">フィルタ通過</div></div>
+      <div class="tune-stat"><div class="num red" id="tuneReject">0</div><div class="lbl">除外された</div></div>
+    </div>
+    <div class="tune-bar"><div class="tune-bar-inner" id="tuneBar"></div></div>
+    <div class="tune-breakdown" id="tuneBreakdown"></div>
+  </div>
   <div class="cb">
     <input type="file" id="fileInput" accept="video/*" style="display:none">
     <button class="b sec" onclick="$('fileInput').click()">📁</button><div class="cd"></div>
@@ -181,6 +272,7 @@ body{font-family:var(--sans);background:var(--bg0);color:var(--t1);min-height:10
     <button class="b primary" id="btnRealtime" disabled onclick="startRealtime()">▶ 等速</button>
     <button class="b scan" id="btnScan" disabled onclick="startFastScan()">⚡ スキャン</button>
     <button class="b danger" id="btnStop" style="display:none" onclick="stopAll()">■ 停止</button>
+    <button class="b sec" id="btnTune" disabled onclick="toggleTuning()" style="font-size:9px">🔧 チューニング</button>
     <div class="cs"></div>
     <div class="cg"><label>速度:</label><select id="speedSelect"><option value="1">1x</option><option value="2">2x</option><option value="4" selected>4x</option><option value="8">8x</option><option value="16">16x</option></select></div><div class="cd"></div>
     <div class="cg"><label>間隔:</label><input type="number" id="intervalInput" value="3" min="0.5" max="60" step="0.5"><span>秒</span></div>
@@ -203,31 +295,108 @@ body{font-family:var(--sans);background:var(--bg0);color:var(--t1);min-height:10
       <div class="srow"><select id="detectMode" style="width:100%"><option value="motion" selected>◎ 動体検知のみ（推奨）</option><option value="ai">🤖 AIのみ</option><option value="hybrid">🔀 ハイブリッド</option><option value="cropzoom">🔍 クロップズーム</option></select></div>
     </div>
     <!-- Motion basic -->
-    <div class="sc"><h4>動体 <span class="tg mt">基本</span></h4>
-      <div class="srow"><label>感度:</label><input type="range" id="motionSensitivity" min="5" max="80" value="25"><span class="sv" id="motionSensVal">25</span></div>
-      <div class="srow"><label>最小:</label><input type="number" id="minArea" value="150" min="10" max="100000" step="10"><span style="color:var(--t3)">px²</span></div>
-      <div class="srow"><label>最大:</label><input type="number" id="maxArea" value="50000" min="100" max="500000" step="100"><span style="color:var(--t3)">px²</span></div>
+    <div class="sc"><h4>動体検知 <span class="tg mt">基本</span></h4>
+      <div class="fdesc">フレーム間の差分から動きを検出します。<b>感度を上げる</b>と小さな動きも拾いますが、ノイズも増えます。</div>
+      <div class="frow"><div class="frow-icon orange">📡</div><div class="frow-body">
+        <div class="frow-title">感度</div>
+        <div class="frow-hint">高い＝小さな動きも拾う / 低い＝大きな動きだけ</div>
+        <div class="frow-ctrl"><input type="range" id="motionSensitivity" min="5" max="80" value="25"><span class="sv" id="motionSensVal">25</span></div>
+      </div></div>
+      <div class="frow"><div class="frow-icon orange">📐</div><div class="frow-body">
+        <div class="frow-title">サイズ範囲</div>
+        <div class="frow-hint">検知する物体の大きさ（ピクセル面積）の上限と下限</div>
+        <div class="frow-ctrl"><span>最小</span><input type="number" id="minArea" value="150" min="10" max="100000" step="10"><span>〜最大</span><input type="number" id="maxArea" value="50000" min="100" max="500000" step="100"><span>px²</span></div>
+      </div></div>
     </div>
+
     <!-- Shadow filters -->
-    <div class="sc"><h4>影対策 <span class="tg ft">FILTER</span></h4>
-      <div class="srow"><label>背景学習:</label><input type="range" id="bgLearnRate" min="0" max="100" value="30"><span class="sv" id="bgLearnVal">0.30</span></div>
-      <div class="srow"><label>ぼかし:</label><input type="range" id="blurRadius" min="0" max="5" value="2"><span class="sv" id="blurVal">2</span></div>
-      <div class="srow"><label>収縮膨張:</label><input type="range" id="morphSize" min="0" max="4" value="2"><span class="sv" id="morphVal">2</span></div>
-      <div class="srow"><label>輝度変化:</label><input type="range" id="brightnessReject" min="0" max="30" value="10"><span class="sv" id="brightVal">10</span></div>
-      <div class="srow"><label>縦横比:</label><input type="number" id="maxAspect" value="4" min="1" max="20" step="0.5"></div>
-      <div class="srow"><label>連続回数:</label><input type="number" id="persistFrames" value="2" min="1" max="10"></div>
+    <div class="sc"><h4>影・日差し対策 <span class="tg ft">環境ノイズ除去</span></h4>
+      <div class="fdesc">雲の通過や日差しの変化、木の影の揺れなど<b>環境由来のノイズ</b>を減らすフィルタ群です。</div>
+
+      <div class="frow"><div class="frow-icon purple">🧠</div><div class="frow-body">
+        <div class="frow-title">背景学習</div>
+        <div class="frow-hint">背景を徐々に学習し、ゆっくりした照明変化を吸収。<b>高い</b>＝変化に素早く適応（鳥も背景化しやすい）/ <b>低い</b>＝変化に鈍感</div>
+        <div class="frow-ctrl"><input type="range" id="bgLearnRate" min="0" max="100" value="30"><span class="sv" id="bgLearnVal">0.30</span></div>
+      </div></div>
+
+      <div class="frow"><div class="frow-icon purple">💨</div><div class="frow-body">
+        <div class="frow-title">ぼかし（ノイズ除去）</div>
+        <div class="frow-hint">差分画像にぼかしを適用。細かい粒状のノイズを滑らかにする。<b>強すぎると</b>小さい鳥もぼかされる</div>
+        <div class="frow-ctrl"><input type="range" id="blurRadius" min="0" max="5" value="2"><span class="sv" id="blurVal">2</span></div>
+      </div></div>
+
+      <div class="frow"><div class="frow-icon purple">🔲</div><div class="frow-body">
+        <div class="frow-title">収縮→膨張</div>
+        <div class="frow-hint">小さな点を消し（収縮）、残った塊を復元（膨張）。<b>影や小さなチラつき</b>が消える。値2以上で大半の影が除去される</div>
+        <div class="frow-ctrl"><input type="range" id="morphSize" min="0" max="4" value="2"><span class="sv" id="morphVal">2</span></div>
+      </div></div>
+
+      <div class="frow"><div class="frow-icon purple">☁️</div><div class="frow-body">
+        <div class="frow-title">全体輝度変化の除外</div>
+        <div class="frow-hint">画面全体が一斉に明るく/暗くなった場合（雲の通過等）、そのフレームを丸ごとスキップ</div>
+        <div class="frow-ctrl"><input type="range" id="brightnessReject" min="0" max="30" value="10"><span class="sv" id="brightVal">10</span></div>
+      </div></div>
+
+      <div class="frow"><div class="frow-icon purple">↔️</div><div class="frow-body">
+        <div class="frow-title">縦横比フィルタ</div>
+        <div class="frow-hint">極端に細長い検知を除外。<b>影は地面に沿って横長</b>になりやすい。鳥は比較的正方形に近い。値4＝縦横比4:1以上を除外</div>
+        <div class="frow-ctrl"><input type="number" id="maxAspect" value="4" min="1" max="20" step="0.5"><span>:1 以上を除外</span></div>
+      </div></div>
+
+      <div class="frow"><div class="frow-icon purple">🔁</div><div class="frow-body">
+        <div class="frow-title">連続検知フレーム数</div>
+        <div class="frow-hint">同じ場所でN回連続して動きが検知されたときだけログに記録。<b>1回だけの瞬間的ノイズ</b>を排除</div>
+        <div class="frow-ctrl"><input type="number" id="persistFrames" value="2" min="1" max="10"><span>回連続で記録</span></div>
+      </div></div>
     </div>
+
     <!-- NEW: Advanced motion filters -->
-    <div class="sc"><h4>高度フィルタ <span class="tg nt">NEW</span></h4>
-      <div class="srow"><label>揺らめき除外:</label><input type="checkbox" id="filterOscillation" checked><span style="color:var(--t3);font-size:8px">同位置反復を除外</span></div>
-      <div class="srow"><label>充填率:</label><input type="range" id="fillRatioMin" min="5" max="80" value="15"><span class="sv" id="fillRatioVal">15%</span></div>
-      <div class="srow"><label>エッジ密度:</label><input type="range" id="edgeDensityMin" min="0" max="50" value="8"><span class="sv" id="edgeDensityVal">8%</span></div>
-      <div class="srow"><label>ゾーン冷却:</label><input type="checkbox" id="filterHotzone" checked><span style="color:var(--t3);font-size:8px">高頻度エリア減衰</span></div>
+    <div class="sc"><h4>高度ノイズ除外 <span class="tg nt">鳥 vs 枝・影</span></h4>
+      <div class="fdesc">鳥と枝/影を区別するための<b>物理特性ベース</b>のフィルタ。鳥は丸い形でテクスチャ豊富。影は薄くてのっぺり。枝は同じ場所で往復する。</div>
+
+      <div class="frow"><div class="frow-icon red">🌿</div><div class="frow-body">
+        <div class="frow-title">揺らめき除外<span class="fstat" id="statOsc">除外: 0</span></div>
+        <div class="frow-hint"><b>同じ場所で繰り返し出現→消滅する動き</b>（風で揺れる枝・葉）を自動除外。有効にすると、20回以上同じセルで反復検知されたものを除去</div>
+        <div class="frow-ctrl"><input type="checkbox" id="filterOscillation" checked><span>有効</span></div>
+      </div></div>
+
+      <div class="frow"><div class="frow-icon green">⬛</div><div class="frow-body">
+        <div class="frow-title">充填率（形の詰まり具合）<span class="fstat" id="statFill">除外: 0</span></div>
+        <div class="frow-hint"><b>検知枠の中にどれだけ実際の動きがあるか</b>。鳥＝枠内がしっかり埋まる（30%+）。影＝枠が大きいがスカスカ（10%以下）。低すぎるものを除外</div>
+        <div class="frow-ctrl"><input type="range" id="fillRatioMin" min="5" max="80" value="15"><span class="sv" id="fillRatioVal">15%</span><span>以上を通過</span></div>
+      </div></div>
+
+      <div class="frow"><div class="frow-icon cyan">🪶</div><div class="frow-body">
+        <div class="frow-title">エッジ密度（テクスチャ量）<span class="fstat" id="statEdge">除外: 0</span></div>
+        <div class="frow-hint"><b>検知枠内のテクスチャの豊富さ</b>。鳥＝羽毛やくちばしで輪郭線が多い。影＝均一で輪郭が少ない。テクスチャが少なすぎるものを除外</div>
+        <div class="frow-ctrl"><input type="range" id="edgeDensityMin" min="0" max="50" value="8"><span class="sv" id="edgeDensityVal">8%</span><span>以上を通過</span></div>
+      </div></div>
+
+      <div class="frow"><div class="frow-icon blue">🔥</div><div class="frow-body">
+        <div class="frow-title">ゾーン冷却（ホットスポット減衰）<span class="fstat" id="statHot">除外: 0</span></div>
+        <div class="frow-hint"><b>常にノイズが出続ける定位置</b>（水面反射、ケーブルの振動等）の検知力を自動的に下げる。累積50回以上検知された場所は80%除外される</div>
+        <div class="frow-ctrl"><input type="checkbox" id="filterHotzone" checked><span>有効</span></div>
+      </div></div>
+
+      <div class="filter-stats-bar" id="filterStatsBar">
+        <div class="fstat-item">候補: <span class="fstat-val" id="fsCandidates">0</span></div>
+        <div class="fstat-item">→ 通過: <span class="fstat-val" id="fsPassed" style="color:var(--green)">0</span></div>
+        <div class="fstat-item">除外合計: <span class="fstat-val" id="fsRejected" style="color:var(--red)">0</span></div>
+      </div>
     </div>
+
     <!-- Crop-zoom -->
     <div class="sc"><h4>クロップズーム <span class="tg zt">ZOOM</span></h4>
-      <div class="srow"><label>拡大:</label><input type="number" id="cropZoomSize" value="300" min="100" max="640" step="10"><span style="color:var(--t3)">px</span></div>
-      <div class="srow"><label>マージン:</label><input type="range" id="cropMargin" min="0" max="100" value="40"><span class="sv" id="cropMarginVal">40%</span></div>
+      <div class="fdesc">動体検知の候補領域を<b>切り出して拡大</b>し、AIに再投入。小さな鳥のAI認識率が向上します。</div>
+      <div class="frow"><div class="frow-icon cyan">🔍</div><div class="frow-body">
+        <div class="frow-title">拡大サイズ</div>
+        <div class="frow-ctrl"><input type="number" id="cropZoomSize" value="300" min="100" max="640" step="10"><span>px四方に拡大</span></div>
+      </div></div>
+      <div class="frow"><div class="frow-icon cyan">📏</div><div class="frow-body">
+        <div class="frow-title">マージン</div>
+        <div class="frow-hint">切り出し時に周囲をどれだけ余分に含めるか。鳥の全体像がAIに渡るよう余裕を持たせる</div>
+        <div class="frow-ctrl"><input type="range" id="cropMargin" min="0" max="100" value="40"><span class="sv" id="cropMarginVal">40%</span></div>
+      </div></div>
     </div>
   </div>
 </section>
@@ -397,6 +566,8 @@ let snapCanvas=null,snapCtx=null;
 // 高度フィルタ用
 let oscillationMap=null; // 揺らめき検知: グリッドごとの出現/消失カウント
 let hotzoneMap=null;     // ゾーン冷却: グリッドごとの累積検知回数
+// フィルタ除外カウンタ（UI表示用）
+let fStats={candidates:0,passed:0,oscReject:0,fillReject:0,edgeReject:0,hotReject:0};
 
 const DEDUP_INTERVAL=1,CELL_SIZE=4;
 const ROI_COLORS=['#22c55e','#06b6d4','#f59e0b','#a855f7','#ef4444','#ec4899'];
@@ -466,6 +637,7 @@ function detectMotion(video){
   if(!hotzoneMap||hotzoneMap.length!==gC*gR)hotzoneMap=new Float32Array(gC*gR);
 
   const mc=new Set(),results=[];
+  let _cand=0,_oscR=0,_fillR=0,_edgeR=0,_hotR=0;
   for(const bb of bbs){
     const x=bb.mnx*cW,y=bb.mny*cH,w=(bb.mxx-bb.mnx+1)*cW,h=(bb.mxy-bb.mny+1)*cH,a=w*h;
     if(a<minA||a>maxA)continue;
@@ -476,35 +648,38 @@ function detectMotion(video){
     persistGrid[ck]=(persistGrid[ck]||0)+1;
     if(persistGrid[ck]<persReq)continue;
 
+    _cand++; // 基本フィルタ通過 = 高度フィルタの候補数
+
     // --- 高度フィルタ1: 揺らめき除外 ---
     if(useOscFilter){
       oscillationMap[ck]=(oscillationMap[ck]||0)+1;
-      // 同じセルで20回以上検知→揺らめきとみなす
-      if(oscillationMap[ck]>20)continue;
+      if(oscillationMap[ck]>20){_oscR++;continue}
     }
 
     // --- 高度フィルタ2: ゾーン冷却 ---
     if(useHotzone){
       hotzoneMap[ck]=(hotzoneMap[ck]||0)+1;
-      // 累積50回以上→ホットゾーン（常にノイズが出る場所）→検知力を減衰
-      if(hotzoneMap[ck]>50&&Math.random()>0.2)continue; // 80%除外
+      if(hotzoneMap[ck]>50&&Math.random()>0.2){_hotR++;continue}
     }
 
     // --- 高度フィルタ3: 充填率 ---
     const fillR=calcFillRatio(cleaned,width,[x,y,w,h]);
-    if(fillR<minFillRatio)continue; // 影はスカスカで充填率が低い
+    if(fillR<minFillRatio){_fillR++;continue}
 
     // --- 高度フィルタ4: エッジ密度 ---
     const edgeD=calcEdgeDensity(gray,width,height,[x,y,w,h]);
-    if(edgeD<minEdgeDensity)continue; // 影はエッジが少ない
+    if(edgeD<minEdgeDensity){_edgeR++;continue}
 
     results.push({bbox:[x,y,w,h],class:'motion',score:Math.min(a/maxA,1),method:'motion',area:a,fillRatio:fillR,edgeDensity:edgeD});
   }
 
+  // フィルタ統計を更新
+  fStats.candidates+=_cand;fStats.oscReject+=_oscR;fStats.fillReject+=_fillR;fStats.edgeReject+=_edgeR;fStats.hotReject+=_hotR;fStats.passed+=results.length;
+  updateFilterStats(_cand,results.length,_oscR,_fillR,_edgeR,_hotR);
+
   // Decay
   for(let i=0;i<persistGrid.length;i++){
     if(!mc.has(i)){persistGrid[i]=0;if(oscillationMap)oscillationMap[i]=Math.max(0,oscillationMap[i]-0.5)}
-    // ゾーン冷却の緩やかな減衰
     if(hotzoneMap)hotzoneMap[i]*=0.998;
   }
   return results;
@@ -542,7 +717,7 @@ $('roiMode').addEventListener('change',()=>{buildRoiMask();if(isRoiMode)drawRoiO
 function drawRoiLines(){if(!roiZones.length)return;ctx.save();ctx.setLineDash([6,4]);ctx.lineWidth=1;ctx.globalAlpha=.3;roiZones.forEach((z,i)=>{ctx.strokeStyle=ROI_COLORS[i%ROI_COLORS.length];ctx.strokeRect(z.x,z.y,z.w,z.h)});ctx.restore()}
 
 // File
-$('fileInput').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;videoPlayer.src=URL.createObjectURL(f);videoPlayer.load();videoPlayer.addEventListener('loadedmetadata',function m(){videoPlayer.removeEventListener('loadedmetadata',m);videoLoaded=true;bgModel=null;persistGrid=null;oscillationMap=null;hotzoneMap=null;$('uploadZone').style.display='none';$('overlayInfo').style.display='flex';$('btnRealtime').disabled=false;$('btnScan').disabled=false;$('btnRoi').disabled=false;videoPlayer.currentTime=0;videoPlayer.addEventListener('seeked',function s(){videoPlayer.removeEventListener('seeked',s);setStatus('active','READY')})})});
+$('fileInput').addEventListener('change',e=>{const f=e.target.files[0];if(!f)return;videoPlayer.src=URL.createObjectURL(f);videoPlayer.load();videoPlayer.addEventListener('loadedmetadata',function m(){videoPlayer.removeEventListener('loadedmetadata',m);videoLoaded=true;bgModel=null;persistGrid=null;oscillationMap=null;hotzoneMap=null;$('uploadZone').style.display='none';$('overlayInfo').style.display='flex';$('btnRealtime').disabled=false;$('btnScan').disabled=false;$('btnRoi').disabled=false;$('btnTune').disabled=false;videoPlayer.currentTime=0;videoPlayer.addEventListener('seeked',function s(){videoPlayer.removeEventListener('seeked',s);setStatus('active','READY')})})});
 $('thresholdSlider').addEventListener('input',()=>{$('thresholdVal').textContent=($('thresholdSlider').value/100).toFixed(2)});
 $('motionSensitivity').addEventListener('input',()=>{$('motionSensVal').textContent=$('motionSensitivity').value});
 $('bgLearnRate').addEventListener('input',()=>{$('bgLearnVal').textContent=($('bgLearnRate').value/100).toFixed(2)});
@@ -554,16 +729,16 @@ $('fillRatioMin').addEventListener('input',()=>{$('fillRatioVal').textContent=$(
 $('edgeDensityMin').addEventListener('input',()=>{$('edgeDensityVal').textContent=$('edgeDensityMin').value+'%'});
 
 // Realtime / Scan
-function startRealtime(){if(!videoLoaded)return;if(isRoiMode)toggleRoiMode();stopAll();isDetecting=true;const sp=parseFloat($('speedSelect').value);videoPlayer.playbackRate=sp;videoPlayer.currentTime=0;videoPlayer.play();bgModel=null;persistGrid=null;oscillationMap=null;hotzoneMap=null;$('btnRealtime').style.display='none';$('btnScan').style.display='none';$('btnStop').style.display='inline-flex';$('recTag').style.display='inline';$('motionTag').style.display=$('detectMode').value!=='ai'?'inline':'none';$('speedTag').style.display='inline';$('speedTag').textContent=sp+'x';$('progressSection').classList.remove('visible');setStatus('detecting','DETECTING '+sp+'x');lastLogTime=-1;runLoop()}
-async function runLoop(){if(!isDetecting)return;if(videoPlayer.ended||videoPlayer.paused){stopAll();return}const t0=performance.now();syncCanvas();const results=await runDet(videoPlayer,$('detectMode').value);drawDet(results);drawRoiLines();const ct=videoPlayer.currentTime;if(results.length>0&&(ct-lastLogTime)>=DEDUP_INTERVAL){lastLogTime=ct;addGroup(ct,results)}const dt=performance.now()-t0;fpsHistory.push(dt);if(fpsHistory.length>20)fpsHistory.shift();if(performance.now()-lastFpsUpdate>500){$('fpsTag').textContent=Math.round(1000/(fpsHistory.reduce((a,b)=>a+b,0)/fpsHistory.length))+' FPS';lastFpsUpdate=performance.now()}$('timeTag').textContent=fmtT(ct);animFrameId=requestAnimationFrame(runLoop)}
-async function startFastScan(){if(!videoLoaded)return;if(isRoiMode)toggleRoiMode();stopAll();isFastScanning=true;bgModel=null;persistGrid=null;oscillationMap=null;hotzoneMap=null;$('btnRealtime').style.display='none';$('btnScan').style.display='none';$('btnStop').style.display='inline-flex';$('scanTag').style.display='inline';$('motionTag').style.display=$('detectMode').value!=='ai'?'inline':'none';$('speedTag').style.display='none';$('progressSection').classList.add('visible');$('progressFill').style.width='0%';setStatus('scanning','SCANNING');videoPlayer.pause();const dur=videoPlayer.duration,intv=parseFloat($('intervalInput').value)||3,tot=Math.ceil(dur/intv);scanAbortController={aborted:false};let proc=0;const t0=performance.now();for(let t=0;t<dur;t+=intv){if(scanAbortController.aborted)break;await seekWait(videoPlayer,t);syncCanvas();const r=await runDet(videoPlayer,$('detectMode').value);drawDet(r);drawRoiLines();if(r.length>0)addGroup(t,r);proc++;const pct=(proc/tot)*100;$('progressFill').style.width=pct+'%';$('progressText').textContent=proc+'/'+tot+' ('+pct.toFixed(1)+'%)';$('timeTag').textContent=fmtT(t);const el=(performance.now()-t0)/1000,pf=el/proc;$('progressEta').textContent='残り: '+fmtT((tot-proc)*pf);$('fpsTag').textContent=(1/pf).toFixed(1)+' f/s'}if(!scanAbortController.aborted){setStatus('done','COMPLETE');$('progressText').textContent='完了: '+tot+'F';$('progressEta').textContent='検知: '+groups.length+'G';$('progressFill').style.width='100%'}['scanTag','motionTag'].forEach(t=>$(t).style.display='none');$('btnStop').style.display='none';$('btnRealtime').style.display='inline-flex';$('btnScan').style.display='inline-flex';isFastScanning=false}
+function startRealtime(){if(!videoLoaded)return;if(isRoiMode)toggleRoiMode();stopAll();isDetecting=true;const sp=parseFloat($('speedSelect').value);videoPlayer.playbackRate=sp;videoPlayer.currentTime=0;videoPlayer.play();bgModel=null;persistGrid=null;oscillationMap=null;hotzoneMap=null;resetFilterStats();$('btnRealtime').style.display='none';$('btnScan').style.display='none';$('btnStop').style.display='inline-flex';$('recTag').style.display='inline';$('motionTag').style.display=$('detectMode').value!=='ai'?'inline':'none';$('speedTag').style.display='inline';$('speedTag').textContent=sp+'x';$('progressSection').classList.remove('visible');setStatus('detecting','DETECTING '+sp+'x');lastLogTime=-1;runLoop()}
+async function runLoop(){if(!isDetecting)return;if(videoPlayer.ended||videoPlayer.paused){stopAll();return}const t0=performance.now();syncCanvas();const results=await runDet(videoPlayer,$('detectMode').value);drawDet(results);drawRoiLines();const ct=videoPlayer.currentTime;if(results.length>0&&(ct-lastLogTime)>=DEDUP_INTERVAL){lastLogTime=ct;addGroup(ct,results)}const dt=performance.now()-t0;fpsHistory.push(dt);if(fpsHistory.length>20)fpsHistory.shift();if(performance.now()-lastFpsUpdate>500){$('fpsTag').textContent=Math.round(1000/(fpsHistory.reduce((a,b)=>a+b,0)/fpsHistory.length))+' FPS';lastFpsUpdate=performance.now()}$('timeTag').textContent=fmtT(ct);tlUpdate();animFrameId=requestAnimationFrame(runLoop)}
+async function startFastScan(){if(!videoLoaded)return;if(isRoiMode)toggleRoiMode();stopAll();isFastScanning=true;bgModel=null;persistGrid=null;oscillationMap=null;hotzoneMap=null;resetFilterStats();$('btnRealtime').style.display='none';$('btnScan').style.display='none';$('btnStop').style.display='inline-flex';$('scanTag').style.display='inline';$('motionTag').style.display=$('detectMode').value!=='ai'?'inline':'none';$('speedTag').style.display='none';$('progressSection').classList.add('visible');$('progressFill').style.width='0%';setStatus('scanning','SCANNING');videoPlayer.pause();const dur=videoPlayer.duration,intv=parseFloat($('intervalInput').value)||3,tot=Math.ceil(dur/intv);scanAbortController={aborted:false};let proc=0;const t0=performance.now();for(let t=0;t<dur;t+=intv){if(scanAbortController.aborted)break;await seekWait(videoPlayer,t);syncCanvas();const r=await runDet(videoPlayer,$('detectMode').value);drawDet(r);drawRoiLines();if(r.length>0)addGroup(t,r);proc++;const pct=(proc/tot)*100;$('progressFill').style.width=pct+'%';$('progressText').textContent=proc+'/'+tot+' ('+pct.toFixed(1)+'%)';$('timeTag').textContent=fmtT(t);const el=(performance.now()-t0)/1000,pf=el/proc;$('progressEta').textContent='残り: '+fmtT((tot-proc)*pf);$('fpsTag').textContent=(1/pf).toFixed(1)+' f/s'}if(!scanAbortController.aborted){setStatus('done','COMPLETE');$('progressText').textContent='完了: '+tot+'F';$('progressEta').textContent='検知: '+groups.length+'G';$('progressFill').style.width='100%';tlRedraw()}['scanTag','motionTag'].forEach(t=>$(t).style.display='none');$('btnStop').style.display='none';$('btnRealtime').style.display='inline-flex';$('btnScan').style.display='inline-flex';isFastScanning=false}
 function seekWait(v,t){return new Promise(r=>{v.currentTime=t;function s(){v.removeEventListener('seeked',s);requestAnimationFrame(()=>requestAnimationFrame(r))}v.addEventListener('seeked',s)})}
 function stopAll(){isDetecting=false;isFastScanning=false;if(animFrameId)cancelAnimationFrame(animFrameId);if(scanAbortController)scanAbortController.aborted=true;videoPlayer.pause();videoPlayer.playbackRate=1;$('btnRealtime').style.display='inline-flex';$('btnScan').style.display='inline-flex';$('btnStop').style.display='none';['recTag','scanTag','motionTag','speedTag'].forEach(t=>$(t).style.display='none');ctx.clearRect(0,0,overlayCanvas.width,overlayCanvas.height);if(videoLoaded)setStatus('active','STOPPED')}
 function syncCanvas(){if(overlayCanvas.width!==videoPlayer.videoWidth||overlayCanvas.height!==videoPlayer.videoHeight){overlayCanvas.width=videoPlayer.videoWidth||640;overlayCanvas.height=videoPlayer.videoHeight||480}}
 function drawDet(results){ctx.clearRect(0,0,overlayCanvas.width,overlayCanvas.height);results.forEach(d=>{const[x,y,w,h]=d.bbox;const isMo=d.method==='motion',isZoom=d.method==='zoom';const c=isZoom?'#06b6d4':isMo?'#f97316':'#ef4444';const a=isZoom?'rgba(6,182,212,.8)':isMo?'rgba(249,115,22,.6)':'rgba(239,68,68,.8)';ctx.strokeStyle=a;ctx.lineWidth=isZoom?3:isMo?1:2;ctx.strokeRect(x,y,w,h);if(!isMo||isZoom){const cl=Math.min(w,h)*.2;ctx.strokeStyle=c;ctx.lineWidth=3;ctx.beginPath();ctx.moveTo(x,y+cl);ctx.lineTo(x,y);ctx.lineTo(x+cl,y);ctx.stroke();ctx.beginPath();ctx.moveTo(x+w-cl,y);ctx.lineTo(x+w,y);ctx.lineTo(x+w,y+cl);ctx.stroke();ctx.beginPath();ctx.moveTo(x,y+h-cl);ctx.lineTo(x,y+h);ctx.lineTo(x+cl,y+h);ctx.stroke();ctx.beginPath();ctx.moveTo(x+w-cl,y+h);ctx.lineTo(x+w,y+h);ctx.lineTo(x+w,y+h-cl);ctx.stroke()}let lbl=isZoom?'🔍'+d.class.toUpperCase()+' '+(d.score*100).toFixed(0)+'%':isMo?'':d.class.toUpperCase()+' '+(d.score*100).toFixed(0)+'%';if(lbl){ctx.font='bold 10px JetBrains Mono,monospace';const tw=ctx.measureText(lbl).width;ctx.fillStyle=a;ctx.fillRect(x,y-16,tw+8,16);ctx.fillStyle='#fff';ctx.fillText(lbl,x+4,y-4)}})}
 
 // Grouped log
-function addGroup(time,results){const id=++groupId;const thumb=captureSnapshot(videoPlayer,results);const items=results.map(r=>({class:r.class,score:r.score,method:r.method,area:r.area||0,feedback:null,fillRatio:r.fillRatio,edgeDensity:r.edgeDensity}));groups.push({id,time,items,feedback:null,thumbDataUrl:thumb});$('logEmpty').style.display='none';updateStats();renderGrp(groups[groups.length-1],true)}
+function addGroup(time,results){const id=++groupId;const thumb=captureSnapshot(videoPlayer,results);const items=results.map(r=>({class:r.class,score:r.score,method:r.method,area:r.area||0,feedback:null,fillRatio:r.fillRatio,edgeDensity:r.edgeDensity}));groups.push({id,time,items,feedback:null,thumbDataUrl:thumb});$('logEmpty').style.display='none';updateStats();renderGrp(groups[groups.length-1],true);tlShow()}
 function renderGrp(g,isNew){const el=document.createElement('div');el.className='grp'+(isNew?' hl':'');el.id='grp-'+g.id;const methods=[...new Set(g.items.map(i=>i.method))];const mTags=methods.map(m=>'<span class="lm '+(m==='zoom'?'zoom':m==='motion'?'motion':'ai')+'">'+(m==='zoom'?'ZOOM':m==='motion'?'MOT':'AI')+'</span>').join('');
 el.innerHTML=`<div class="grp-header" onclick="toggleExpand(${g.id})"><div class="grp-thumb" onclick="event.stopPropagation();seekTo(${g.time})"><canvas id="thumb-${g.id}" width="160" height="90"></canvas><div class="grp-count">${g.items.length}</div></div><div class="grp-info"><div class="grp-time" onclick="event.stopPropagation();seekTo(${g.time})">${fmtT(g.time)}</div><div class="grp-methods">${mTags}</div><div class="grp-summary">${g.items.map(i=>i.class.toUpperCase()).join(', ')}</div></div><div class="grp-actions" onclick="event.stopPropagation()"><button class="grp-fb${g.feedback==='correct'?' correct':''}" onclick="setGrpFB(${g.id},'correct',this)">○</button><button class="grp-fb${g.feedback==='incorrect'?' incorrect':''}" onclick="setGrpFB(${g.id},'incorrect',this)">✕</button></div></div><div class="grp-detail" id="detail-${g.id}">${g.items.map((it,idx)=>`<div class="grp-det-item"><span class="lm ${it.method==='zoom'?'zoom':it.method==='motion'?'motion':'ai'}" style="font-size:7px">${it.method==='zoom'?'Z':it.method==='motion'?'M':'AI'}</span><span class="gdi-class">${it.class.toUpperCase()}</span><span class="gdi-score">${it.method==='motion'?it.area.toLocaleString()+'px²':(it.score*100).toFixed(1)+'%'}</span><div class="gdi-fb"><button class="fb-sm${it.feedback==='correct'?' correct':''}" onclick="setItemFB(${g.id},${idx},'correct',this)">○</button><button class="fb-sm${it.feedback==='incorrect'?' incorrect':''}" onclick="setItemFB(${g.id},${idx},'incorrect',this)">✕</button></div></div>`).join('')}</div>`;
 $('logContainer').prepend(el);const img=new Image();img.onload=()=>{const c=$('thumb-'+g.id);if(c){c.getContext('2d').drawImage(img,0,0,160,90)}};img.src=g.thumbDataUrl;if(isNew)setTimeout(()=>el.classList.remove('hl'),2000)}
@@ -571,16 +746,27 @@ function toggleExpand(gid){$('grp-'+gid)?.classList.toggle('expanded')}
 function setGrpFB(gid,type,btn){const g=groups.find(g=>g.id===gid);if(!g)return;g.feedback=type;g.items.forEach(it=>it.feedback=type);btn.parentElement.querySelectorAll('.grp-fb').forEach(b=>b.className='grp-fb');btn.classList.add(type);updateStats()}
 function setItemFB(gid,idx,type,btn){const g=groups.find(g=>g.id===gid);if(!g)return;g.items[idx].feedback=type;btn.parentElement.querySelectorAll('.fb-sm').forEach(b=>b.className='fb-sm');btn.classList.add(type);g.feedback=null;$('grp-'+gid)?.querySelectorAll('.grp-actions .grp-fb').forEach(b=>b.className='grp-fb');updateStats()}
 function updateStats(){const ti=groups.reduce((s,g)=>s+g.items.length,0);$('statGroups').textContent=groups.length;$('statItems').textContent=ti;$('statCorrect').textContent=groups.reduce((s,g)=>s+g.items.filter(i=>i.feedback==='correct').length,0);$('statIncorrect').textContent=groups.reduce((s,g)=>s+g.items.filter(i=>i.feedback==='incorrect').length,0);$('detectionCount').textContent=groups.length+'G';$('btnReview').disabled=groups.length===0}
-function clearLog(){if(!groups.length||!confirm('クリアしますか？'))return;groups=[];groupId=0;lastLogTime=-1;$('logContainer').innerHTML='';$('logContainer').appendChild($('logEmpty'));$('logEmpty').style.display='flex';updateStats()}
+function clearLog(){if(!groups.length||!confirm('クリアしますか？'))return;groups=[];groupId=0;lastLogTime=-1;$('logContainer').innerHTML='';$('logContainer').appendChild($('logEmpty'));$('logEmpty').style.display='flex';updateStats();$('tlWrap').style.display='none';$('tlLegend').style.display='none';tlVisible=false}
 function exportCSV(){if(!groups.length){alert('データなし');return}let csv='group_id,time_sec,time_formatted,item_index,class,score,method,area_px,fill_ratio,edge_density,feedback\n';for(const g of groups)for(let i=0;i<g.items.length;i++){const it=g.items[i];csv+=g.id+','+g.time.toFixed(2)+','+fmtT(g.time)+','+i+','+it.class+','+it.score.toFixed(4)+','+it.method+','+it.area+','+(it.fillRatio||0).toFixed(3)+','+(it.edgeDensity||0).toFixed(3)+','+(it.feedback||'')+'\n'}const a=document.createElement('a');a.href=URL.createObjectURL(new Blob([csv],{type:'text/csv;charset=utf-8;'}));a.download='bird_det_'+new Date().toISOString().slice(0,19).replace(/:/g,'-')+'.csv';a.click()}
 function seekTo(t){videoPlayer.currentTime=t;videoPlayer.pause()}
 function fmtT(s){return[Math.floor(s/3600),Math.floor((s%3600)/60),Math.floor(s%60)].map(v=>String(v).padStart(2,'0')).join(':')}
+function updateFilterStats(cand,passed,osc,fill,edge,hot){
+  const el=id=>{ const e=$(id); if(e)e.textContent=arguments; return e; };
+  if($('statOsc'))$('statOsc').textContent='除外: '+fStats.oscReject;
+  if($('statFill'))$('statFill').textContent='除外: '+fStats.fillReject;
+  if($('statEdge'))$('statEdge').textContent='除外: '+fStats.edgeReject;
+  if($('statHot'))$('statHot').textContent='除外: '+fStats.hotReject;
+  if($('fsCandidates'))$('fsCandidates').textContent=fStats.candidates;
+  if($('fsPassed'))$('fsPassed').textContent=fStats.passed;
+  if($('fsRejected'))$('fsRejected').textContent=fStats.oscReject+fStats.fillReject+fStats.edgeReject+fStats.hotReject;
+}
+function resetFilterStats(){fStats={candidates:0,passed:0,oscReject:0,fillReject:0,edgeReject:0,hotReject:0};updateFilterStats()}
 function setStatus(type,text){$('statusBadge').className='sb '+type;$('statusBadge').textContent=text}
 
 // Review mode
 let rvIndex=0,rvOpen=false;
 function openReview(){if(!groups.length)return;rvOpen=true;rvIndex=groups.findIndex(g=>g.feedback===null);if(rvIndex<0)rvIndex=0;$('reviewOverlay').classList.add('open');$('rvDone').style.display='none';$('rvBody').style.display='flex';rvRender()}
-function closeReview(){rvOpen=false;$('reviewOverlay').classList.remove('open');refreshLogList()}
+function closeReview(){rvOpen=false;$('reviewOverlay').classList.remove('open');refreshLogList();tlRedraw()}
 function rvGoTo(i){rvIndex=i;$('rvDone').style.display='none';$('rvBody').style.display='flex';rvRender()}
 function rvRender(){if(rvIndex<0)rvIndex=0;if(rvIndex>=groups.length){rvShowDone();return}const g=groups[rvIndex];const rev=groups.filter(g=>g.feedback!==null).length;$('rvProgressFill').style.width=(rev/groups.length*100)+'%';$('rvProgressText').textContent=`${rvIndex+1}/${groups.length}（済:${rev}）`;$('rvPrev').disabled=rvIndex===0;$('rvNext').disabled=rvIndex>=groups.length-1;$('rvTime').textContent=fmtT(g.time);$('rvDetCount').textContent=g.items.length+'件';const b=$('rvBadge');b.className='rv-status-badge '+(g.feedback||'unmarked');b.textContent=g.feedback==='correct'?'正検知 ○':g.feedback==='incorrect'?'誤検知 ✕':'未判定';$('rvClasses').textContent=g.items.map(i=>i.class.toUpperCase()).join(', ');$('rvBtnO').classList.toggle('active',g.feedback==='correct');$('rvBtnX').classList.toggle('active',g.feedback==='incorrect');const cv=$('rvCanvas');const img=new Image();img.onload=()=>{cv.width=img.naturalWidth;cv.height=img.naturalHeight;cv.getContext('2d').drawImage(img,0,0)};img.src=g.thumbDataUrl;videoPlayer.currentTime=g.time}
 function rvMark(type){if(rvIndex>=groups.length)return;const g=groups[rvIndex];g.feedback=type;g.items.forEach(it=>it.feedback=type);updateStats();rvRender();setTimeout(()=>rvNav(1),250)}
@@ -588,6 +774,181 @@ function rvNav(dir){rvIndex+=dir;if(rvIndex<0)rvIndex=0;if(rvIndex>=groups.lengt
 function rvShowDone(){$('rvBody').style.display='none';$('rvDone').style.display='block';const c=groups.filter(g=>g.feedback==='correct').length,ic=groups.filter(g=>g.feedback==='incorrect').length;$('rvDT').textContent=groups.length;$('rvDC').textContent=c;$('rvDI').textContent=ic;$('rvProgressFill').style.width='100%'}
 function refreshLogList(){for(const g of groups){const el=$('grp-'+g.id);if(!el)continue;const btns=el.querySelectorAll('.grp-actions .grp-fb');btns.forEach(b=>b.className='grp-fb');if(g.feedback==='correct')btns[0]?.classList.add('correct');if(g.feedback==='incorrect')btns[1]?.classList.add('incorrect')}updateStats()}
 document.addEventListener('keydown',e=>{if(!rvOpen)return;switch(e.key){case'ArrowLeft':e.preventDefault();rvNav(-1);break;case'ArrowRight':e.preventDefault();rvNav(1);break;case'o':case'O':e.preventDefault();rvMark('correct');break;case'x':case'X':e.preventDefault();rvMark('incorrect');break;case' ':e.preventDefault();rvNav(1);break;case'Escape':e.preventDefault();closeReview();break}});
+
+// ============================================================
+//  タイムライン表示
+//  検知グループを時間軸上にヒートマップ風に描画
+// ============================================================
+let tlVisible=false;
+
+function tlShow(){
+  if(!videoLoaded||!groups.length)return;
+  $('tlWrap').style.display='block';$('tlLegend').style.display='flex';
+  tlVisible=true;
+  $('tlEnd').textContent=fmtT(videoPlayer.duration);
+  tlRedraw();
+}
+
+function tlRedraw(){
+  const canvas=$('tlCanvas');const wrap=$('tlWrap');
+  canvas.width=wrap.clientWidth;canvas.height=36;
+  const cx=canvas.getContext('2d');
+  const dur=videoPlayer.duration;if(dur<=0)return;
+  const w=canvas.width,h=canvas.height;
+
+  cx.clearRect(0,0,w,h);
+
+  // ビン分割: 動画時間をN個のスロットに分ける
+  const numBins=Math.min(w,Math.ceil(dur));
+  const binWidth=w/numBins;
+  const bins=new Array(numBins).fill(0);
+  const binFeedback=new Array(numBins).fill(null); // 'correct'|'incorrect'|null
+
+  for(const g of groups){
+    const bi=Math.min(numBins-1,Math.floor(g.time/dur*numBins));
+    bins[bi]+=g.items.length;
+    if(g.feedback==='correct')binFeedback[bi]='correct';
+    else if(g.feedback==='incorrect'&&binFeedback[bi]!=='correct')binFeedback[bi]='incorrect';
+  }
+
+  const maxCount=Math.max(1,...bins);
+
+  // 描画
+  for(let i=0;i<numBins;i++){
+    if(bins[i]===0)continue;
+    const intensity=bins[i]/maxCount;
+    const barH=Math.max(3,intensity*(h-4));
+    const x=i*binWidth;
+
+    let color;
+    if(binFeedback[i]==='correct') color=`rgba(34,197,94,${0.3+intensity*0.7})`;
+    else if(binFeedback[i]==='incorrect') color=`rgba(239,68,68,${0.2+intensity*0.5})`;
+    else color=`rgba(249,115,22,${0.3+intensity*0.7})`;
+
+    cx.fillStyle=color;
+    cx.fillRect(x,h-barH,Math.max(2,binWidth-1),barH);
+  }
+
+  // プレイヘッド更新
+  const pct=videoPlayer.currentTime/dur*100;
+  $('tlPlayhead').style.left=pct+'%';
+}
+
+function tlClick(e){
+  const rect=$('tlWrap').getBoundingClientRect();
+  const pct=(e.clientX-rect.left)/rect.width;
+  const t=pct*videoPlayer.duration;
+  videoPlayer.currentTime=t;
+  videoPlayer.pause();
+  $('tlPlayhead').style.left=(pct*100)+'%';
+  if(tuningActive)runTuneFrame();
+}
+
+function tlHover(e){
+  const rect=$('tlWrap').getBoundingClientRect();
+  const pct=(e.clientX-rect.left)/rect.width;
+  const t=pct*videoPlayer.duration;
+  const tooltip=$('tlTooltip');
+  tooltip.textContent=fmtT(t);
+  tooltip.style.left=(pct*100)+'%';
+  tooltip.style.display='block';
+  // その時点の検知数
+  const nearby=groups.filter(g=>Math.abs(g.time-t)<3);
+  if(nearby.length)tooltip.textContent=fmtT(t)+' | '+nearby.reduce((s,g)=>s+g.items.length,0)+'件検知';
+}
+
+// タイムライン定期更新（検知中）
+function tlUpdate(){
+  if(!tlVisible)return;
+  const dur=videoPlayer.duration;if(dur<=0)return;
+  $('tlPlayhead').style.left=(videoPlayer.currentTime/dur*100)+'%';
+}
+
+// ============================================================
+//  チューニングモード
+//  現在のフレームで動体検知を実行し、各フィルタの効果を
+//  リアルタイムで可視化。パラメータ変更の結果がすぐわかる。
+// ============================================================
+let tuningActive=false;
+let tuneStats={candidates:0,passed:0,sizeReject:0,aspectReject:0,oscReject:0,fillReject:0,edgeReject:0,hotReject:0};
+
+function toggleTuning(){
+  tuningActive=!tuningActive;
+  $('tunePanel').classList.toggle('open',tuningActive);
+  $('btnTune').style.background=tuningActive?'var(--amber)':'';
+  $('btnTune').style.color=tuningActive?'#000':'';
+  if(tuningActive){
+    videoPlayer.pause();
+    runTuneFrame();
+    // パラメータ変更時に自動再分析
+    document.querySelectorAll('.frow-ctrl input').forEach(el=>{
+      el.addEventListener('input',tuneDebounce);
+      el.addEventListener('change',tuneDebounce);
+    });
+  }
+}
+
+let _tuneTimer=null;
+function tuneDebounce(){clearTimeout(_tuneTimer);_tuneTimer=setTimeout(runTuneFrame,150)}
+
+function runTuneFrame(){
+  if(!tuningActive||!videoLoaded)return;
+  $('tuneFrameInfo').textContent=fmtT(videoPlayer.currentTime);
+
+  // 一時的にフィルタ統計をリセットして1フレームだけ分析
+  const savedStats={...fStats};
+  fStats={candidates:0,passed:0,oscReject:0,fillReject:0,edgeReject:0,hotReject:0};
+
+  // 動体検知を1回実行（結果は描画にも使う）
+  syncCanvas();
+  const results=detectMotion(videoPlayer);
+  drawDet(results);
+  drawRoiLines();
+
+  // チューニング表示を更新
+  const cand=fStats.candidates;
+  const pass=fStats.passed;
+  const totalReject=fStats.oscReject+fStats.fillReject+fStats.edgeReject+fStats.hotReject;
+
+  $('tuneCand').textContent=cand;
+  $('tunePass').textContent=pass;
+  $('tuneReject').textContent=totalReject;
+
+  // 内訳タグ
+  const bd=$('tuneBreakdown');
+  bd.innerHTML='';
+  const tags=[
+    {cls:'sz',label:'サイズ外',val:cand>0?'—':'0',show:true},
+    {cls:'asp',label:'縦横比',val:'—',show:true},
+    {cls:'osc',label:'揺らめき',val:fStats.oscReject,show:fStats.oscReject>0},
+    {cls:'fill',label:'充填率',val:fStats.fillReject,show:fStats.fillReject>0},
+    {cls:'edge',label:'エッジ',val:fStats.edgeReject,show:fStats.edgeReject>0},
+    {cls:'hot',label:'ゾーン冷却',val:fStats.hotReject,show:fStats.hotReject>0},
+  ];
+  for(const t of tags){
+    if(!t.show&&t.val===0)continue;
+    const el=document.createElement('span');
+    el.className='tune-tag '+t.cls;
+    el.innerHTML=t.label+': <span class="ct">'+t.val+'</span>';
+    bd.appendChild(el);
+  }
+  if(totalReject===0&&cand===0){
+    bd.innerHTML='<span style="font-family:var(--mono);font-size:9px;color:var(--t3)">このフレームでは動体なし（パラメータを変えて再試行）</span>';
+  }
+
+  // プログレスバー
+  const bar=$('tuneBar');
+  const total=Math.max(1,cand);
+  const passW=(pass/total*100).toFixed(1);
+  const oscW=(fStats.oscReject/total*100).toFixed(1);
+  const fillW=(fStats.fillReject/total*100).toFixed(1);
+  const edgeW=(fStats.edgeReject/total*100).toFixed(1);
+  const hotW=(fStats.hotReject/total*100).toFixed(1);
+  bar.innerHTML=`<div class="tune-bar-seg" style="width:${passW}%;background:var(--green)"></div><div class="tune-bar-seg" style="width:${oscW}%;background:var(--red)"></div><div class="tune-bar-seg" style="width:${fillW}%;background:#22c55e88"></div><div class="tune-bar-seg" style="width:${edgeW}%;background:var(--cyan)"></div><div class="tune-bar-seg" style="width:${hotW}%;background:var(--blue)"></div>`;
+
+  // 統計を戻す
+  fStats=savedStats;
+}
 
 loadModel();
 </script>
